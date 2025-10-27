@@ -17,7 +17,7 @@ myst:
 
 # <i class="fa-solid fa-dice"></i> Resampling Strategies
 
-As neuropsychologists, you will be well aware of the challenges involved in data collection — time, cost, and the complexities of experimental design often make large datasets hard to come by. However, robust predictive modeling is critical not only because extensive datasets can be rare, but also because ensuring that models generalize well to new data is often an essential question.
+As future data scientists, you are probably well aware of the challenges involved in data collection — time, cost, and the complexities of experimental design often make large datasets hard to come by. However, robust predictive modeling is critical not only because extensive datasets can be rare, but also because ensuring that models generalize well to new data is often an essential question.
 
 Resampling methods offer a powerful approach to assess model performance and mitigate overfitting. Rather than relying on a single train-test split, which can yield performance estimates that vary significantly depending on the split, resampling techniques repeatedly draw samples from your data. This process simulates multiple independent training and test sets, providing a more stable and reliable evaluation of your model.
 
@@ -28,12 +28,12 @@ Resampling methods offer a powerful approach to assess model performance and mit
 Two of the most widely used resampling methods are:
 
 - *Cross validation*: Creating non-overlapping subsets for training and testing
-- *Bootstrapping*: Sampling with replacement, resulting in (partly) overlapping samples
+- *Bootstrapping*: Sampling with replacement, resulting in overlapping samples
 ```
 
 ## The data
 
-We will use a dataset you are already familiar with from last semester: The [Iris](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_iris.html) dataset which contains 150 samples from three species of the iris plant (iris setosa, iris virginica and iris versicolor). The data contains four features: the length and the width of the sepals and petals (in centimeters).
+We will use the famous [Iris](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_iris.html) dataset, which contains 150 samples from three species of the iris plant (iris setosa, iris virginica and iris versicolor). The data contains four features: the length and the width of the sepals and petals (in centimeters).
 
 ```{code-cell} 
 import seaborn as sns
@@ -45,7 +45,10 @@ iris = datasets.load_iris(as_frame=True)
 df = iris.frame
 df['class'] = pd.Categorical.from_codes(iris.target, iris.target_names)
 
-# Plot data
+df.describe()
+```
+
+```{code-cell} 
 sns.scatterplot(data=df, x='sepal length (cm)', y='sepal width (cm)', hue="class");
 ```
 
@@ -77,7 +80,7 @@ The simplest form of cross validation is to simply split the dataset into two pa
 The validation set splits the dataset into a training and a testing set (these do not necessarily need to be of equal size).
 ```
 
-The training and testing set neither need to be of equal size nor do they need to be contiguous blocks in the data. Let's try the validation set approach on the `Iris` data:
+The training and testing set **neither need to be of equal size nor do they need to be contiguous blocks in the data**. Let's try the validation set approach on the `Iris` data:
 
 1.  Define features and target data
 
@@ -223,9 +226,21 @@ print(f"Average accuracy:    {scores.mean()}")
 print(f"Indidual accuracies: {scores}")
 ```
 
-## Side Note: Bootstrapping
+## Bootstrapping
 
-Bootstrapping is a resampling technique used to estimate the sampling distribution of an estimator by repeatedly drawing samples — *with replacement* — from the original dataset. In the context of machine learning, bootstrapping is often used to assess the variability and uncertainty of model performance (for the purpose of estimating the prediction accuracies, k-fold CV is generally preferred). Unlike traditional cross-validation, which partitions the dataset into distinct training and validation sets, bootstrapping creates multiple training sets by sampling the data with replacement. In each iteration, the model is trained on the bootstrap sample, and the out-of-bag (OOB) samples (i.e., the observations not included in that particular bootstrap sample) are used as a surrogate for the validation set. Generally, a larger number of iterations would be performed in real applications, but we here outline the concept with 10 iterations:
+Bootstrapping is a resampling method that helps us estimate how much a model’s results might vary if we collected a different dataset. The idea is simple: instead of having just one training set, we create many “new” datasets by sampling with replacement from the original data.
+
+Each bootstrap sample is the same size as the original dataset, but because sampling is done with replacement, some observations will appear more than once, while others might not appear at all.
+
+For each bootstrap iteration:
+
+1. A new sample (the bootstrap sample) is drawn from the data.
+2. The model is trained on this bootstrap sample.
+3. The observations that were not included in that sample — called out-of-bag (OOB) samples — are used to test the model.
+
+Repeating this process many times gives multiple estimates of model performance. The variability among these estimates provides insight into the model’s uncertainty and stability. In contrast, cross-validation divides the data into fixed folds and does not resample with replacement. Cross-validation is generally better for estimating predictive accuracy, while bootstrapping is often used to assess the uncertainty of model parameters or performance estimates. 
+
+We here outline the concept with 10 iterations:
 
 ```{code-cell} ipython3
 import numpy as np
@@ -270,3 +285,5 @@ for i in range(n_iterations):
 
 print("\nMean Accuracy:", np.mean(scores))
 ```
+
+As you can see, the prediction accuracies are typically higher than those from cross-validation. This is expected because bootstrapping reuses parts of the same data across samples, leading to some overlap between training and evaluation data.

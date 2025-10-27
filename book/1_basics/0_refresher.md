@@ -116,7 +116,7 @@ model = smf.ols("y ~ x", data=df).fit()
 print(model.summary())
 ```
 
-You should already be familiar with such outputs. Briefly, the most important information is the model parameters displayed under `coef` and the performance statistics such as the `R-squared`.
+In this output, the most important information are the model parameters displayed under `coef` and the performance statistics such as the `R-squared`.
 You can see that our model has an R-squared of 0.753, which means that the model explains 75% of the variance in the data. That's pretty good! But I'm sure we can do better. After all, life is more complicated than just a straigth line, no? <sub>(And we also know that the underlying data was simulated according to a 3rd order polynomial.)</sub>
 
 ```{code-cell} ipython3
@@ -305,10 +305,105 @@ So how can we then find the best model that avoids overfitting? From your classe
 
 This essentially translates to *"Before you try a complicated hypothesis, you should make quite sure that no simplification of it will explain the facts equally well"*. Our model should thus be as simple as possible, but as complex as necessary. In machine learning, this concept is often referred to as the [](2_bias_variance), which we will explore next week.
 
+## Different Ways of Implementing Regression Models
+
+There are many different Python packages that allow you to implement regression models, with popular choices being `statsmodels`, `numpy`, and `sklearn`. The specific choice ultimately depends on your preferences and goals.
+
+At the top of this section, you have already seen the high-level *formula API* solution from `statsmodels`. For a cubic model, this would look like this:
+
+```{code-cell} ipython3
+import statsmodels.formula.api as smf
+
+# Fit model
+model = smf.ols("y ~ x + I(x**2) + I(x**3)", data=df).fit()
+
+# Predictions
+x_test = pd.DataFrame({"x": [-4, 1, 3]})
+print(model.predict(x_test))
+```
+
+Alternatively, you can use the lower-level `OLS()` approach, which requires you to manually specify the design matrix (make sure to add a column for the intercept/bias):
+
+```{code-cell} ipython3
+import statsmodels.api as sm
+from sklearn.preprocessing import PolynomialFeatures
+
+# Create design matrix
+X = x.reshape(-1, 1)
+poly = PolynomialFeatures(degree=3, include_bias=True)
+X_poly = poly.fit_transform(X)
+
+# Fit model
+model = sm.OLS(y, X_poly).fit()
+```
+
+A cool thing about statsmodels is that you can get the model results in various forms:
+
+```{code-cell} ipython3
+summary = model.summary()
+print(summary)
+```
+
+```{code-cell} ipython3
+print(summary.tables[1])
+```
+
+```{code-cell} ipython3
+print(model.params) # [beta0, beta1, beta2, beta3]
+```
+
+```{code-cell} ipython3
+# Prediciton
+x_test = np.array([[-4], [1], [3]])
+X_test_poly = poly.transform(x_test)
+y_hat = model.predict(X_test_poly)
+print(y_hat)
+```
+
+With the polynomial features, we can also directly use `sklearn`:
+
+```{code-cell} ipython3
+from sklearn.linear_model import LinearRegression
+
+# Fit model
+model = LinearRegression(fit_intercept=False).fit(X_poly, y) # we already have the itercept in X_poly
+print(model.coef_) # [beta0, beta1, beta2, beta3]
+
+# Predict
+y_hat = model.predict(X_test_poly)
+print(y_hat)
+```
+
+And last but not least, one could also use `numpy`:
+
+```{code-cell} ipython3
+import numpy as np
+from matplotlib import pyplot as plt
+
+coeffs = np.polyfit(x, y, deg=3)
+print(coeffs)
+p = np.poly1d(coeffs)
+
+# Predict
+x_test = np.array([-4, 1, 3])
+y_hat = p(x_test)
+print(y_hat)
+
+# Plot
+fig, ax = plt.subplots()
+ax.scatter(x, y, color="gray", label="Data")
+x_fit = np.linspace(x.min(), x.max(), 200)
+ax.plot(x_fit, p(x_fit), label="Model")
+plt.legend();
+```
+
+In practice, `statsmodels` is ideal for statistical analysis and reporting (provides a lot of information for inference), `scikit-learn` for machine learning pipelines and prediction, and `numpy` for quick or lightweight fits.
+
 ```{admonition} Summary
 :class: tip
 
 - Regression models can be used as prediction models in the context of machine learning.
 - The performance of a prediction model should always be assessed on new, unseen data.
 - It is often useful to look for the simplest possible model that still provides sufficiently accurate answers.
+- There are many Python packages that allow you to implement regression models. Chose whichever suits your goals best.
 ```
