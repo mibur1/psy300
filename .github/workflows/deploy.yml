@@ -2,100 +2,45 @@ name: deploy-book
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
+
+env:
+  BASE_URL: /${{ github.event.repository.name }}
 
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-  build-and-deploy:
+  deploy-book:
     runs-on: ubuntu-latest
-
+    permissions:
+      pages: write
+      id-token: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: 3.11
 
-      - name: Create venv and install deps
+      - name: Install dependencies
         run: |
-          python -m venv .venv
-          . .venv/bin/activate
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-          # Ensure real Jupyter Book + friends are present (pin if you like)
-          pip install "jupyter-book>=1.0" myst-nb sphinx-book-theme plotly ipykernel
+          pip install -r requirements.txt
 
-      - name: Show versions (sanity)
+      - name: Build the book
         run: |
-          . .venv/bin/activate
-          which jupyter-book
-          jupyter-book --version
-          python - <<'PY'
-          import importlib, sys
-          print("python:", sys.version)
-          try:
-              jb = importlib.import_module("jupyter_book")
-              print("jupyter_book:", getattr(jb,"__version__","unknown"))
-          except Exception as e:
-              print("jupyter_book import failed:", e)
-          PY
-
-      - name: Sanity-check _toc.yml targets
-        run: |
-          . .venv/bin/activate
-          python - <<'PY'
-          import os, sys, yaml
-          toc = yaml.safe_load(open('_toc.yml','r',encoding='utf-8'))
-          def paths(n):
-              if isinstance(n,list):
-                  for x in n: yield from paths(x)
-              elif isinstance(n,dict):
-                  if 'root' in n: yield n['root']
-                  if 'file' in n: yield n['file']
-                  for k in ('parts','chapters','sections'):
-                      if k in n: yield from paths(n[k])
-          missing, dir_no_index = [], []
-          for p in paths(toc):
-              if os.path.isdir(p):
-                  if not (os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))):
-                      dir_no_index.append(p)
-              elif not (
-                  os.path.exists(p+'.md') or os.path.exists(p+'.ipynb') or
-                  os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))
-              ):
-                  missing.append(p)
-          if dir_no_index:
-              print("⚠️ Directories without index.md/ipynb:", ", ".join(dir_no_index))
-          if missing:
-              print("❌ Missing pages (case/path mismatch?):", ", ".join(missing))
-              sys.exit(1)
-          print("✅ _toc.yml looks consistent.")
-          PY
-
-      - name: Build the book (use venv’s script)
-        run: |
-          . .venv/bin/activate
-          jupyter-book clean .
-          jupyter-book build . --keep-going
+          jupyter-book build .
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _build/html
+          path: "_build/html"
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
