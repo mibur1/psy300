@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - main
-
-env:
-  BASE_URL: /${{ github.event.repository.name }}
+  workflow_dispatch:
 
 concurrency:
   group: "pages"
@@ -18,29 +16,78 @@ jobs:
     permissions:
       pages: write
       id-token: write
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          # Prefer pinned deps here. If requirements.txt already pins these, just `pip install -r requirements.txt`.
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install jupyter-book myst-nb sphinx-book-theme plotly ipykernel
+          fi
 
-      - name: Build the book
+      # Optional but VERY helpful: catch EISDIR / missing files early
+      - name: Sanity-check _toc.yml targets (files & case)
         run: |
-          jupyter-book build .
+          python - <<'PY'
+          import os, sys, yaml
+          toc = yaml.safe_load(open('_toc.yml','r',encoding='utf-8'))
+          def paths(n):
+              if isinstance(n,list):
+                  for x in n: yield from paths(x)
+              elif isinstance(n,dict):
+                  if 'root' in n: yield n['root']
+                  if 'file' in n: yield n['file']
+                  for k in ('parts','chapters','sections'):
+                      if k in n: yield from paths(n[k])
+          missing = []
+          dirs_without_index = []
+          for p in paths(toc):
+              if os.path.isdir(p):
+                  # Folder is OK only if it has index.(md|ipynb)
+                  if not (os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))):
+                      dirs_without_index.append(p)
+              elif not (
+                  os.path.exists(p+'.md') or
+                  os.path.exists(p+'.ipynb') or
+                  os.path.exists(os.path.join(p,'index.md')) or
+                  os.path.exists(os.path.join(p,'index.ipynb'))
+              ):
+                  missing.append(p)
+          if dirs_without_index:
+              print("⚠️ Directories without index.md/ipynb (EISDIR risk):", ", ".join(dirs_without_index))
+          if missing:
+              print("❌ Missing pages (case/path mismatch?):", ", ".join(missing))
+              sys.exit(1)
+          print("✅ _toc.yml looks consistent.")
+          PY
+
+      # Helpful listing to debug case issues on Linux
+      - name: Show top-level tree and key assets
+        run: |
+          ls -la
+          test -d _static && ls -la _static || true
+          test -f logo.png && echo "Found logo.png" || echo "logo.png missing"
+
+      - name: Build the book (fail on warnings)
+        run: |
+          jupyter-book clean .
+          jupyter-book build . -W --keep-going
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "_build/html"
+          path: _build/html
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages
