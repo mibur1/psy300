@@ -2,8 +2,7 @@ name: deploy-book
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
@@ -28,15 +27,24 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Prefer pinned deps here. If requirements.txt already pins these, just `pip install -r requirements.txt`.
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            pip install jupyter-book myst-nb sphinx-book-theme plotly ipykernel
-          fi
+          pip install -r requirements.txt
+          # If requirements.txt doesn't pin these, ensure they're present:
+          pip install "jupyter-book>=1.0" myst-nb sphinx-book-theme
 
-      # Optional but VERY helpful: catch EISDIR / missing files early
-      - name: Sanity-check _toc.yml targets (files & case)
+      - name: Show jupyter-book path and version
+        run: |
+          which jupyter-book
+          jupyter-book --version
+          python - <<'PY'
+          import importlib
+          try:
+              jb = importlib.import_module("jupyter_book")
+              print("python jupyter_book version:", getattr(jb, "__version__", "unknown"))
+          except Exception as e:
+              print("Failed to import jupyter_book:", e)
+          PY
+
+      - name: Sanity-check _toc.yml targets
         run: |
           python - <<'PY'
           import os, sys, yaml
@@ -49,39 +57,27 @@ jobs:
                   if 'file' in n: yield n['file']
                   for k in ('parts','chapters','sections'):
                       if k in n: yield from paths(n[k])
-          missing = []
-          dirs_without_index = []
+          missing, dir_no_index = [], []
           for p in paths(toc):
               if os.path.isdir(p):
-                  # Folder is OK only if it has index.(md|ipynb)
                   if not (os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))):
-                      dirs_without_index.append(p)
-              elif not (
-                  os.path.exists(p+'.md') or
-                  os.path.exists(p+'.ipynb') or
-                  os.path.exists(os.path.join(p,'index.md')) or
-                  os.path.exists(os.path.join(p,'index.ipynb'))
-              ):
+                      dir_no_index.append(p)
+              elif not (os.path.exists(p+'.md') or os.path.exists(p+'.ipynb') or
+                        os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))):
                   missing.append(p)
-          if dirs_without_index:
-              print("⚠️ Directories without index.md/ipynb (EISDIR risk):", ", ".join(dirs_without_index))
+          if dir_no_index:
+              print("⚠️ Directories without index.md/ipynb:", ", ".join(dir_no_index))
           if missing:
               print("❌ Missing pages (case/path mismatch?):", ", ".join(missing))
               sys.exit(1)
           print("✅ _toc.yml looks consistent.")
           PY
 
-      # Helpful listing to debug case issues on Linux
-      - name: Show top-level tree and key assets
+      - name: Build the book
         run: |
-          ls -la
-          test -d _static && ls -la _static || true
-          test -f logo.png && echo "Found logo.png" || echo "logo.png missing"
-
-      - name: Build the book (fail on warnings)
-        run: |
-          jupyter-book clean .
-          jupyter-book build . -W --keep-going
+          python -m jupyter_book.cli clean .
+          python -m jupyter_book.cli build . --keep-going
+          # If your installed version supports it, you can add: -W
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
