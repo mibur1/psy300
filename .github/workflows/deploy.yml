@@ -9,43 +9,53 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  deploy-book:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Create venv and install deps
         run: |
+          python -m venv .venv
+          . .venv/bin/activate
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          # If requirements.txt doesn't pin these, ensure they're present:
-          pip install "jupyter-book>=1.0" myst-nb sphinx-book-theme
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          # Ensure real Jupyter Book + friends are present (pin if you like)
+          pip install "jupyter-book>=1.0" myst-nb sphinx-book-theme plotly ipykernel
 
-      - name: Show jupyter-book path and version
+      - name: Show versions (sanity)
         run: |
+          . .venv/bin/activate
           which jupyter-book
           jupyter-book --version
           python - <<'PY'
-          import importlib
+          import importlib, sys
+          print("python:", sys.version)
           try:
               jb = importlib.import_module("jupyter_book")
-              print("python jupyter_book version:", getattr(jb, "__version__", "unknown"))
+              print("jupyter_book:", getattr(jb,"__version__","unknown"))
           except Exception as e:
-              print("Failed to import jupyter_book:", e)
+              print("jupyter_book import failed:", e)
           PY
 
       - name: Sanity-check _toc.yml targets
         run: |
+          . .venv/bin/activate
           python - <<'PY'
           import os, sys, yaml
           toc = yaml.safe_load(open('_toc.yml','r',encoding='utf-8'))
@@ -62,8 +72,10 @@ jobs:
               if os.path.isdir(p):
                   if not (os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))):
                       dir_no_index.append(p)
-              elif not (os.path.exists(p+'.md') or os.path.exists(p+'.ipynb') or
-                        os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))):
+              elif not (
+                  os.path.exists(p+'.md') or os.path.exists(p+'.ipynb') or
+                  os.path.exists(os.path.join(p,'index.md')) or os.path.exists(os.path.join(p,'index.ipynb'))
+              ):
                   missing.append(p)
           if dir_no_index:
               print("⚠️ Directories without index.md/ipynb:", ", ".join(dir_no_index))
@@ -73,11 +85,11 @@ jobs:
           print("✅ _toc.yml looks consistent.")
           PY
 
-      - name: Build the book
+      - name: Build the book (use venv’s script)
         run: |
-          python -m jupyter_book.cli clean .
-          python -m jupyter_book.cli build . --keep-going
-          # If your installed version supports it, you can add: -W
+          . .venv/bin/activate
+          jupyter-book clean .
+          jupyter-book build . --keep-going
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
