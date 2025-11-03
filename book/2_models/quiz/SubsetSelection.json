@@ -11,11 +11,11 @@
             "correct": false
         },
         {
-            "answer": "A model with all potential predictors will always have the largest R\u00b2 since the quantities are related to the training error.",
+            "answer": "A model with all potential predictors will always have the largest training R\u00b2.",
             "correct": true
         },
         {
-            "answer": "Backward stepwise selection starts with a full model",
+            "answer": "Backward stepwise selection starts with a full model.",
             "correct": true
         }
     ]

@@ -14,18 +14,18 @@ kernelspec:
 
 # <i class="fa-solid fa-square-check"></i> Model Selection
 
-In neurocognitive psychology, we often collect huge amounts of data — sometimes thousands of measurements from different brain regions or many behavioral scores. Having more information can, in theory, help us make better predictions, but it also brings risks: too many variables can make analyses infeasible, lead to false discoveries, or cause models to learn noise instead of real effects. 
+As data scientists, you often have to work with huge amounts of data. For example, smart phones produce thousands of measurements a day. Having more information can, in theory, help us make better predictions, but it also brings risks: too many variables can make analyses infeasible, lead to false discoveries, or cause models to learn noise instead of real effects. 
 
 
 ## The large p issue
 
 **Big data** refers to large data sets with many predictors which often cannot be processed or analyzed using traditional data processing techniques. For our prediction models, this brings some issues:
 
-- While the linear model can in theory still be used for such data, the **ordinary least squares fit becomes infeasible**, especially when p > n 
-- The large amount of features reduce interpretability
+- While linear models can, in theory, still be applied to such data, the ordinary least squares (OLS) fit becomes infeasible, especially when p > n. In this case, the design matrix is not full rank and becomes singular. This means it cannot be inverted, which results in infinitely many possible solutions.
+- The large number of features also reduces interpretability, making it more difficult for you as a scientist to understand which predictors truly drive the model’s behaviour.
 
 
-This is where **linear model selection** becomes essential, offering techniques to refine our models and extract meaningful insights from high-dimensional data.
+This is where techniques like **linear model selection** becomes essential, offering techniques to refine our models and extract meaningful insights from high-dimensional data.
 
 
 ## Today's data: Hitters
@@ -66,7 +66,6 @@ The heatmap reveals strong correlations between several predictors:
 
 We thus remove two of the correlated features:
 
-
 ```{code-cell} ipython3
 features_drop = ["CRuns", "CAtBat"]
 hitters_subset = hitters_subset.drop(columns=features_drop)
@@ -78,11 +77,13 @@ hitters_subset = hitters_subset.drop(columns=features_drop)
 ```{admonition} Handling big data
 :class: hint
 
-To handle large datasets efficiently in linear modeling, we will introduce three methods:
+To handle large datasets efficiently in linear modeling, three methods will be introduced in this course:
 
 - **Subset Selection**
 - **Dimensionality Reduction**
 - **Regularization / Shrinkage**
+
+Today, we will focus on subset selection.
 ```
 
 ## Subset Selection
