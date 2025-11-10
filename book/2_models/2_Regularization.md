@@ -417,11 +417,11 @@ pcr = make_pipeline(StandardScaler(), PCA(n_components=1), LinearRegression())
 pcr.fit(X_train, y_train)
 
 pca_step = pcr.named_steps["pca"]
-plt.scatter(pca_step.transform(X_test), y_test, alpha=0.3, label="Ground truth")
-plt.scatter(pca_step.transform(X_test), pcr.predict(X_test), alpha=0.3, label="PCR predictions")
-plt.xlabel("First PCA component")
-plt.ylabel("y")
-plt.title("PCR (1 component)")
+
+fig, ax = plt.subplots()
+ax.scatter(pca_step.transform(X_test), y_test, alpha=0.3, label="Ground truth")
+ax.scatter(pca_step.transform(X_test), pcr.predict(X_test), alpha=0.3, label="PCR predictions")
+ax.set(xlabel="First PCA component", ylabel="y", title="PCR (1 component)")
 plt.legend()
 plt.show()
 
@@ -450,11 +450,10 @@ from sklearn.cross_decomposition import PLSRegression
 pls = PLSRegression(n_components=1)
 pls.fit(X_train, y_train)
 
-plt.scatter(pls.transform(X_test), y_test, alpha=0.3, label="Ground truth")
-plt.scatter(pls.transform(X_test), pls.predict(X_test), alpha=0.3, label="PLS predictions")
-plt.xlabel("First PLS component")
-plt.ylabel("y")
-plt.title("PLS (1 component)")
+fig, ax = plt.subplots()
+ax.scatter(pls.transform(X_test), y_test, alpha=0.3, label="Ground truth")
+ax.scatter(pls.transform(X_test), pls.predict(X_test), alpha=0.3, label="PLS predictions")
+ax.set(xlabel="First PLS component", ylabel="y", title="PLS (1 component)")
 plt.legend()
 plt.show()
 
