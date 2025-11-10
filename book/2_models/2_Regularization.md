@@ -17,17 +17,19 @@ myst:
 
 # <i class="fa-solid fa-puzzle-piece"></i> Regularisation, PCR & PLS
 
-Building on subset selection, an alternative approach is to include all *p* predictors in the model but apply regularization—shrinking the **coefficient estimates toward zero** relative to the least squares estimates. This reduces model complexity without fully discarding variables. Though it introduces some bias, it often lowers variance and improves test performance. 
+Building on subset selection, an alternative approach is to include all *p* predictors in the model but apply regularization, shrinking the coefficient estimates toward zero relative to the least squares estimates. This reduces model complexity without fully discarding variables. Though it introduces some bias, it often lowers variance and improves test performance. 
 
 3 approaches are commonly used to regularize the predictors:
+
 - Ridge Regression (L2 Regression)
 - Lasso Regression (L1 Regression)
 - Elastic Net Regression
 
+Beyond penalising coefficients, we can also transform the predictor space:
+- Principal Component Regression (PCR)
+- Partial Least Squares (PLS)
 
-## Today's data: Hitters
-
-For practical demonstration, we will again use the `Hitters` dataset. 
+We will explore all of these models in today's session. For the initial practical demonstration, we will again use the `Hitters` dataset:
 
 ```{code-cell} ipython3
 import statsmodels.api as sm 
@@ -81,8 +83,8 @@ Where:
 
 Combined:
 
-- $L(\boldsymbol\beta)=\sum_{i=1}^{n}\bigl(y_i - \mathbf X_i\,\boldsymbol\beta\bigr)^2$ is the **residual sum of squares (RSS)**
-- $\lambda\sum_{j=1}^{p} \beta_j^2$ is the **L2 penalty** on the coefficients 
+- $\sum_{i=1}^{n}\bigl(y_i - \mathbf X_i\,\boldsymbol\beta\bigr)^2$ is the residual sum of squares (RSS)
+- $\lambda\sum_{j=1}^{p} \beta_j^2$ is the L2 penalty on the coefficients
 
 ```{admonition} The λ parameter
 :class: note 
@@ -95,7 +97,7 @@ Combined:
 Lambda is a hyperparameter which we need to chose ourselves (through e.g. cross validation). 
 ```
 
-### Implementing Ridge Regression
+We can implement Ridge regression as follows:
 
 **Step 1:** We first standardize the predictors as ridge regression is sensitive to scaling. This can be done by using e.g. `StandardScaler` from `scikit-learn`: 
 
@@ -186,8 +188,8 @@ $$L(\boldsymbol\beta)=\sum_{i=1}^{n}\bigl(y_i - \mathbf X_i\,\boldsymbol\beta\bi
 
 Where:
 
-- $L(\boldsymbol\beta)=\sum_{i=1}^{n}\bigl(y_i - \mathbf X_i\,\boldsymbol\beta\bigr)^2$ is the **residual sum of squares (RSS)**  
-- $\lambda\sum_{j=1}^{p}\bigl\lvert \beta_j \bigr\rvert$ is the **L1 penalty** on the coefficients
+- $\sum_{i=1}^{n}\bigl(y_i - \mathbf X_i\,\boldsymbol\beta\bigr)^2$ is the residual sum of squares (RSS)
+- $\lambda\sum_{j=1}^{p}\bigl\lvert \beta_j \bigr\rvert$ is the L1 penalty on the coefficients
 
 You can see, that the concept is nearly identical, with the only difference being the form of the penalty term. Lasso uses the L1 norm ($\bigl\lvert \beta_j \bigr\rvert$) while Ridge uses the L2 norm ($\beta_j^2$).
 Because of this geometric difference in the penalty, Lasso can produce sparse models by zeroing out irrelevant features, whereas Ridge keeps all predictors in the model but with smaller weights. 
@@ -213,7 +215,7 @@ ax.set(title="Lasso coefficients", xlabel="Lambda", ylabel="Beta");
 ```
 
 
-## Why Ridge and Lasso Behave Differently: The Budget
+### Why Ridge and Lasso Behave Differently: The Budget
 
 When we use Ridge or Lasso regression, we are not just trying to fit the data perfectly — we are also trying to control how large the coefficients $\beta_j$ become. If we let them grow without any limits, the model could become too complex and overfit the data.
 
@@ -254,7 +256,7 @@ Neither Ridge nor Lasso will universally be better than the other. The main diff
 Another point to note is their response to multicollinearity:
 
   - Ridge shares the weight among collinear features, keep them all (shrink but don’t zero)
-  - Lasso chooses a subset (often just one) from each collinear group and zero out the rest
+  - Lasso chooses a subset (often just one) from each collinear group and zeroes out the rest
 
 This is where elastic net regression comes into play. Elastic net is a combination of Ridge and Lasso:
 
@@ -345,9 +347,118 @@ plt.show()
 
 ## Principal Component Regression
 
-TODO
+Regularised regression models such as Ridge and Lasso address issues with correlated features or high-dimensional predictors by shrinking the regression coefficients. Another way to handle these issues is to transform the predictor space itself
+before regression. This leads to Principal Component Regression (PCR).
 
+Principal Component Regression (PCR) first performs Principal Component Analysis (PCA) on the predictor matrix `X`. Then, it fits a linear regression model on the PCA-transformed data. This approach works well when directions of high variance in `X` are also predictive for `y`. However, since PCA is unsupervised, it may drop components that explain little variance but have high predictive power.
+
+Let's have a look at this simulated data:
+
+```{code-cell} ipython3
+---
+tags:
+  - hide-input
+---
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+rng = np.random.RandomState(0)
+n_samples = 500
+cov = [[3, 3], [3, 4]]
+X = rng.multivariate_normal(mean=[0, 0], cov=cov, size=n_samples)
+
+fig, ax = plt.subplots()
+ax.scatter(X[:, 0], X[:, 1], alpha=0.3)
+ax.set(xlabel="x1", ylabel="x2", title="Simulated data");
+```
+
+We perform a PCA to get and visualize the two directions of highest variance:
+
+```{code-cell} ipython3
+pca = PCA(n_components=2).fit(X)
+
+fig, ax = plt.subplots()
+ax.scatter(X[:, 0], X[:, 1], alpha=0.3)
+for i, (comp, var) in enumerate(zip(pca.components_, pca.explained_variance_)):
+    ax.plot([0, comp[0]*var], [0, comp[1]*var], lw=5, c=f"C{i + 2}", label=f"PC{i+1}")
+ax.set(aspect="equal", xlabel="x1", ylabel="x2", title="Principal components")
+plt.legend();
+```
+
+For the purpose of this example, we now define the target to be aligned with low variance. This makes `y` strongly correlated with PC2 (the low variance direction):
+
+```{code-cell} ipython3
+y = X.dot(pca.components_[1]) + rng.normal(size=n_samples) / 2
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 3))
+ax[0].scatter(X.dot(pca.components_[0]), y, alpha=0.3)
+ax[0].set(xlabel="Projection on PC1", ylabel="y", title="High-variance direction")
+ax[1].scatter(X.dot(pca.components_[1]), y, alpha=0.3)
+ax[1].set(xlabel="Projection on PC2", ylabel="y", title="Low-variance direction")
+plt.tight_layout();
+```
+
+On this data, we can then perform PCR. Let's first start with one component:
+
+```{code-cell} ipython3
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.decomposition import PCA
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=rng)
+
+pcr = make_pipeline(StandardScaler(), PCA(n_components=1), LinearRegression())
+pcr.fit(X_train, y_train)
+
+pca_step = pcr.named_steps["pca"]
+plt.scatter(pca_step.transform(X_test), y_test, alpha=0.3, label="Ground truth")
+plt.scatter(pca_step.transform(X_test), pcr.predict(X_test), alpha=0.3, label="PCR predictions")
+plt.xlabel("First PCA component")
+plt.ylabel("y")
+plt.title("PCR (1 component)")
+plt.legend()
+plt.show()
+
+print(f"PCR R²: {pcr.score(X_test, y_test):.3f}")
+```
+
+Because PCA is unsupervised, it focuses on directions of high variance (PC1), even though PC2 contains most of the predictive signal. Hence, PCR performs poorly with one component. If we add a second component, we see that the PCR now captures the predictive direction (PC2) and performs much better:
+
+```{code-cell} ipython3
+pcr_2 = make_pipeline(StandardScaler(), PCA(n_components=2), LinearRegression())
+pcr_2.fit(X_train, y_train)
+print(f"PCR (2 components) R²: {pcr_2.score(X_test, y_test):.3f}")
+```
 
 ## Partial Least Squares Regression
 
-TODO
+While PCR focuses purely on the variance structure of `X`, Partial Least Squares (PLS) introduces supervision into the process and can be thought of as a supervised extension of PCR.
+
+Instead of finding directions that maximise variance in `X`, PLS finds latent components that maximise the covariance between `X` and `y`. This allows PLS to identify directions that are both informative about `y` and stable under multicollinearity, even if they explain only modest variance in `X`. As a result, PLS often performs better than PCR when the most predictive information lies in low-variance directions (a situation where PCR tends to fail).
+
+Fitting a model is straightforward:
+
+```{code-cell} ipython3
+from sklearn.cross_decomposition import PLSRegression
+
+pls = PLSRegression(n_components=1)
+pls.fit(X_train, y_train)
+
+plt.scatter(pls.transform(X_test), y_test, alpha=0.3, label="Ground truth")
+plt.scatter(pls.transform(X_test), pls.predict(X_test), alpha=0.3, label="PLS predictions")
+plt.xlabel("First PLS component")
+plt.ylabel("y")
+plt.title("PLS (1 component)")
+plt.legend()
+plt.show()
+
+print(f"PLS R²: {pls.score(X_test, y_test):.3f}")
+```
+
+You can see, even with a single component, PLS can align with the predictive direction because it uses target information. Thus, it achieves a high $R^2$, unlike PCR with one component.
