@@ -22,35 +22,31 @@ myst:
 
 Principal Component Analysis (PCA) is a *dimensionality reduction* technique. It is considered an *unsupervised* machine learning method, since we do not model any relationship with a target/response variable. Instead, PCA finds a lower-dimensional representation of our data.
 
-Simply put, PCA finds the principal components (the *eigenvectors*) of the centered data matrix $X$. Each eigenvector points in a direction of maximal variance, ordered by how much variance it explains.
+Simply put, PCA finds the principal components (the *eigenvectors*) of the data matrix $X$. Each eigenvector points in a direction of maximal variance, ordered by how much variance it explains.
 
 
 ```{code-cell} ipython3
----
-tags:
-  - hide-input
----
 
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-# Simulate & center 2D data
+# Simulate centered 2D data
 rng = np.random.RandomState(0)
 X = rng.multivariate_normal(mean=[0, 0], cov=[[3, 3], [3, 4]], size=500)
 
-# Run PCA: extract eigenvectors and eigenvalues
+# Run PCA: extract eigenvectors and explained variance ratio (eigenvalues / total variance)
 pca2d = PCA().fit(X)
 pcs, scales = pca2d.components_, np.sqrt(pca2d.explained_variance_)
 
-# Plot original data and principal components
+# Plot data
 fig, ax = plt.subplots()
 ax.scatter(X[:, 0], X[:, 1], alpha=0.3, label='Data')
 mean = X.mean(axis=0)
 
-# Draw PC1 (red) and PC2 (blue)
-ax.arrow(*mean, *(pcs[0] * scales[0] * 3), head_width=0.2, head_length=0.3, color='r', linewidth=2, label='PC1')
-ax.arrow(*mean, *(pcs[1] * scales[1] * 3), head_width=0.2, head_length=0.3, color='b', linewidth=2, label='PC2')
+# Plot PCs
+ax.arrow(*mean, *(pcs[0] * scales[0] * 3), head_width=0.2, head_length=0.3, color='r', linewidth=2, label='PC1') # *3 scaling just for visualization
+ax.arrow(*mean, *(pcs[1] * scales[1] * 3), head_width=0.2, head_length=0.3, color='b', linewidth=2, label='PC2') # *3 scaling just for visualization
 ax.set(xlabel="Feature 1", ylabel="Feature 2", title="PCA for 2D data")
 ax.axis('equal')
 ax.legend();
@@ -142,20 +138,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-# Simulate & center 2D data
+# Simulate centered 2D data
 rng = np.random.RandomState(0)
 X = rng.multivariate_normal(mean=[0, 0], cov=[[3, 3], [3, 4]], size=500)
 
-# Run PCA: extract eigenvectors and eigenvalues
+# Run PCA: extract eigenvectors and explained variance ratio
 pca2d = PCA().fit(X)
 pcs, scales = pca2d.components_, np.sqrt(pca2d.explained_variance_)
 
-# Plot original data and principal components
+# Plot data
 fig, ax = plt.subplots()
 ax.scatter(X[:, 0], X[:, 1], alpha=0.3, label='Data')
 mean = X.mean(axis=0)
 
-# Draw PC1 (red) and PC2 (blue)
+# Plot PCs
 ax.arrow(*mean, *(pcs[0] * scales[0] * 3), head_width=0.2, head_length=0.3, color='r', linewidth=2, label='PC1')
 ax.arrow(*mean, *(pcs[1] * scales[1] * 3), head_width=0.2, head_length=0.3, color='b', linewidth=2, label='PC2')
 ax.set(xlabel="Feature 1", ylabel="Feature 2", title="PCA for 2D data")
