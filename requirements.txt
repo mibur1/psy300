@@ -15,4 +15,3 @@ patsy
 ipywidgets
 ISLP
 xgboost
-tensorflow
