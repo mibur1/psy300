@@ -18,13 +18,14 @@ parts:
   chapters:
     - file: book/2_models/1_Model_selection
     - file: book/2_models/2_Regularization
-    - file: book/2_models/3_GAM
-    - file: book/2_models/4_KNN
+    - file: book/2_models/3_PCA_PCR
+    - file: book/2_models/4_Logistic_regression
+    - file: book/2_models/5_GAM
+    - file: book/2_models/5_KNN
     - file: book/2_models/5_LDA_QDA
     - file: book/2_models/6_Naive_bayes
     - file: book/2_models/7_Trees
     - file: book/2_models/8_SVM
-    - file: book/2_models/10_PCA
     - file: book/2_models/Exercises
 
 - caption: Additional Materials

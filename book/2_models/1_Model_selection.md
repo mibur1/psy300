@@ -207,13 +207,13 @@ print(f"   Feature indices : {sfs_backward.k_feature_idx_}")
 print(f"   Feature names   : {sfs_backward.k_feature_names_}")
 ```
 
-#### Subset Selection Summary
+#### Summary
 
-| Best Subset Selection            	  | Forward Stepwise Selection                        | Backward Stepwise Selection                          |
-|-------------------------------------|---------------------------------------------------|------------------------------------------------------|
-|**+** will find the best model       |**-** not guaranteed to find best model            |**-** not guaranteed to find best model               |
-|**-** may overfit with large p       |**+** possible to use when p is very large         |**+** possible to use when p is very large, given p<n |
-|**-** computationally very expensive |**+** computationally less demanding               |**+** computationally less demanding                  |
+| Selection Method  | Finds best model? | Works for large p?        | Works for p>n?          | Computational cost         |
+| ------------------| ------------------| --------------------------|-------------------------| ---------------------------|
+| Best Subset       | **+** Yes         | **-** No                  | **-** No                | **-** Very high            |
+| Forward Stepwise  | **-** No          | **+** Moderate/large p    | **o** If model size < n | **+** Efficient            |
+| Backward Stepwise | **-** No          | **+** Yes (only if p < n) | **-** No                | **o** Relatively Efficient |
 
 
 ```{code-cell} ipython3
@@ -221,6 +221,7 @@ print(f"   Feature names   : {sfs_backward.k_feature_names_}")
 from jupyterquiz import display_quiz
 display_quiz('quiz/SubsetSelection.json')
 ```
+
 
 #### What next?
 
@@ -261,4 +262,4 @@ So in sum:
 
 ### Regularization and Dimensionality Reduction
 
-As mentioned before, regularization and dimensionality reduction are two other measures of dealing with large numbers of predictors. Regularization techniques will be introduced in the [next session](2_Regularization), and dimensionality reduction will be introduced in the [Principal Component Analysis](10_PCA) session.
+As mentioned before, regularization and dimensionality reduction are two other measures of dealing with large numbers of predictors. Regularization techniques will be introduced in the [next session](2_Regularization), and dimensionality reduction will be introduced in the [Principal Component Analysis](3_PCA_PCR) session.
