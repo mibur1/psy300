@@ -18,7 +18,8 @@ myst:
 
 # <i class="fa-solid fa-bars-progress"></i> Logistic Regression
 
-Before applying logistic regression to model our data, we will attempt to do so through simple linear regression. While linear regression is not suitable for dichotomous outcomes, visualizing it can help illustrate why logistic regression is a better fit for our research question.
+Before applying logistic regression to model our data, we will attempt to do so through simple linear regression. While linear regression is not suitable for dichotomous outcomes, 
+visualizing it can help illustrate why logistic regression is a better fit for our research question.
 
 ## Why Not Linear Regression?
 
@@ -36,12 +37,15 @@ ax.set(xlabel="Age [month]", ylabel="Understanding display rules")
 plt.show()
 ```
 
-As you can see, linear regression struggles with binary outcomes, as evidenced by predicted values exceeding 1 beyond approximately 80 months, which is invalid for probabilities. Since our dependent variable is dichotomous (e.g., pass/fail), we need a model that restricts predicted values to fall between 0 and 1, such as logistic regression.
+Linear regression assumes that the dependent variable is continuous and unbounded. When we apply it to a dichotomous outcome such as understanding display rules (0/1), the underlying assumptions break down:
+
+- The model can produce predicted values <0 or >1, which are impossible probabilities.
+- Linear regression assumes homoscedasticity (constant variance of errors), which binary data violate by construction.
 
 
-## Logistic Regression
+## Logistic Regression with Python
 
-Logistic regression naturally ensures that predicted probabilities stay between 0 and 1. In this tutorial, we will use the `LogisticRegression()` class from `scikit-learn` for modeling.
+In this example, we will use the `LogisticRegression()` class from `scikit-learn` for modeling.
 
 ```{code-cell} ipython3
 import numpy as np
@@ -63,15 +67,19 @@ print(f"Coefficients: {results.coef_}")
 
 ### Interpreting the Model Outputs: Logits
 
-The interpretation of the model coefficients is analogous to linear regression:
-- **Intercept:** The expected logit (log-odds) of the outcome (understanding display rules) when age = 0.
-- **Coefficient:** The logit increase of understanding display rules for each one-month increase in age.
+The logistic regression still gives us an intercept and a slope, but they operate on the log-odds scale, not the probability scale:
 
-The output of a logistic regression model is linear in the log-odds (logits). Each coefficient in the logistic regression tells us how a one-unit change in a predictor affects the log-odds of the outcome. While not as intuitive as probabilities, the transformation to logits is crucial because it allows us to use linear regression techniques for binary outcomes. 
+- **Intercept:** The expected logit (log-odds) of the outcome (understanding display rules) when age = 0.
+- **Slope/coefficient:** The logit increase of understanding display rules for each one-month increase in age.
+
+This means the output of a logistic regression model is linear in the log-odds (logits). Each coefficient in the logistic regression tells us 
+how a one-unit change in a predictor affects the log-odds of the outcome. While not as intuitive as probabilities, the transformation to logits is 
+crucial because it allows us to use linear regression techniques for binary outcomes. 
 
 **But what even are logits?**
 
-Logits are the natural logarithm of the odds of an event occurring in logistic regression. The odds of an event are defined as the ratio of the probability of the event occurring ($P$) to the probability of the event not occurring $(1-P)$:
+Logits are the natural logarithm of the odds of an event occurring in logistic regression. 
+The odds of an event are defined as the ratio of the probability of the event occurring ($P$) to the probability of the event not occurring $(1-P)$:
 
 $$\text{Odds} = \frac{P}{1-P}$$
 
@@ -100,7 +108,8 @@ We can simply transform the logits back into probabilities (more specifically th
 
 $$P(Y=1 \mid X) = \frac{1}{1 + e^{-(b_0 + b_1 X)}}$$
 
-To better understand the model's behavior, let’s plot its outputs. A simple way to do this is by ceating an evenly spaced array of values for our range, and then use `model.predict()` to predict the outcome for each value. This will generate the regression line:
+To better understand the model's behavior, let’s plot its outputs. A simple way to do this is by ceating an evenly spaced array of values for our range, 
+and then use `model.predict_proba()` to predict the outcome for each value. This will generate the regression line:
 
 ```{code-cell} ipython3
 # Create an evenly spaced array of values for the range 
@@ -123,7 +132,8 @@ plt.show()
 
 ## Model Evaluation
 
-To evaluate our model, we can examine how many values of $y$ (understanding display rules) were predicted correctly by the model:
+To evaluate our model, we can examine how many values of $y$ (understanding display rules) were predicted correctly by the model. 
+For this, we could binarise the probabilities as returned from `model.predict_proba()` or we can also just simply use `model.predict()`:
 
 ```{code-cell} ipython3
 import numpy as np
@@ -134,7 +144,7 @@ from sklearn.linear_model import LogisticRegression
 
 df = pd.read_csv("data.dat", delimiter='\t')
 X = np.asarray(df['age']).reshape(-1, 1) 
-y = np.asarray(df['display']) # binary outcome
+y = np.asarray(df['display'])
 
 model = LogisticRegression()
 results = model.fit(X, y)
@@ -146,7 +156,8 @@ print("Model predictions:", predictions)
 print("\nAccuracy:", accuracy) 
 ```
 
-An accuracy of 77% indicates the that the model correctly predicts the outcome for about 77% of the children in our data. This suggests that the model peforms reasonably well, altough it still misclassifies some cases. For a more detailed investigation, a confusion matrix is a useful way to visualize the prediction accuracy:
+An accuracy of 77% indicates the that the model correctly predicts the outcome for about 77% of the children in our data. This suggests that the model peforms reasonably well, 
+altough it still misclassifies some cases. For a more detailed investigation, a confusion matrix is a useful way to visualize the prediction accuracy:
 
 ```{code-cell} ipython3
 from sklearn.metrics import confusion_matrix, classification_report
@@ -169,7 +180,7 @@ print(report)
 ```
 The output can be interpreted as follows:
 
-**Precision**: Propportion of true positive predictions among all positive predictions made by the model.
+**Precision**: Proportion of correct predictions among all predictions for that class.
 
 $$\text{Precision} = \frac{\text{True Positives (TP)}}{\text{True Positives (TP)} + \text{False Positives (FP)}}$$
 
@@ -177,7 +188,7 @@ $$\text{Precision} = \frac{\text{True Positives (TP)}}{\text{True Positives (TP)
 - *Class 1: When the model predicts that a sample does understand the display rules (Class 1), 81% of the time it is correct. * 
 
 
-**Recall**: The proportion of true positives that are correctly identified by the model.
+**Recall**: Proportion of actual samples of a class that the model correctly identifies.
 
 $$\text{Recall} = \frac{\text{True Positives (TP)}}{\text{True Positives (TP)} + \text{False Negatives (FN)}}$$
 
