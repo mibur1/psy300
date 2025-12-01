@@ -177,8 +177,6 @@ $$
 \hat{Y} = \text{Anxious}
 $$
 
-In case of a tie, the model would likely default to the class with the higher prior. However, this might be subject to the specific implementation of the model.
-
 For the classification, this is already enough. However, we can also normalise the posterior probabilities to sum to 1. For this, we simply divide each score by the total:
 
 $$
@@ -226,9 +224,7 @@ Result: Both scores are equal -> it's a tie.
 
 **Result:** Both scores are equal → it's a **tie**.
 
-✅ **Correct answer: Tie**
-
-
+✅ **Correct answer: Tie.** In case of a tie, the model would likely default to the class with the higher prior. However, this might be subject to the specific implementation of the model.
 
 ---
 
