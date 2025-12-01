@@ -47,10 +47,8 @@ $$
 
 This is useful because:
 
-- Directly measuring $P(\text{Anxiety} \mid \text{Nail biting})$ might be hard.
-- But we can estimate how common anxiety is in general, and how likely anxious people are to bite their nails.
-- Bayes’ Theorem brings all this together!
-
+- Directly measuring $P(\text{Anxiety} \mid \text{Nail biting})$ might be hard
+- But we can estimate how common anxiety is in general, and how likely anxious people are to bite their nails
 
 What we just did with anxiety and nail biting is exactly what a Naïve Bayes classifier does, just with more features and more classes. In general machine learning notation, we replace:
 
@@ -75,7 +73,7 @@ This is already everything we need to build classifiers that estimate the most l
 
 ## The Naïve Assumption
 
-To compute the likelihood term $P(X \mid Y = k)$ — that is, how likely we are to observe a particular combination of features for a given class—we usually need a complex model that captures how all the features interact.
+To compute the likelihood term $P(X \mid Y = k)$, that is, how likely we are to observe a particular combination of features for a given class, we usually need a complex model that captures how all the features interact.
 
 Naïve Bayes makes a simplifying assumption:
 
@@ -140,24 +138,42 @@ For our example, let us assume the following likelihoods in the training data:
 
 ### 3. Compute the posterior
 
-Using Bayes’ Theorem: 
-
-$$P(Y = k \mid X = x) \propto P(Y = k) \cdot \prod_{j=1}^{p} P(X_j = x_j \mid Y = k)$$
-
-Suppose we observe a person who bites their nails, is fidgeting, and avoids eye contact. We can then compute the unnormalised posteriors:
-
-**Anxious (A)**:
+Using Bayes’ Theorem under the Naïve Bayes assumption:
 
 $$
-P(\text{A}) \cdot P(\text{NB} \mid \text{A}) \cdot P(\text{FI} \mid \text{A}) \cdot P(\text{EC=no} \mid \text{A}) \\
-= 0.6 \cdot 0.8 \cdot 0.7 \cdot 0.6 = 0.2016
+P(Y = k \mid X = x) \propto P(Y = k)\prod_{j=1}^{p} P(X_j = x_j \mid Y = k)
 $$
 
-**Not Anxious (NA)**:
+Here our observed features are:
 
 $$
-P(NA) \cdot P(\text{NB} \mid \text{NA}) \cdot P(\text{FI} \mid \text{NA}) \cdot P(\text{EC=no} \mid \text{NA}) \\
-= 0.4 \cdot 0.3 \cdot 0.2 \cdot 0.4 = 0.0096
+x = (\text{NB}=1,\; \text{FI}=1,\; \text{EC=no})
+$$
+
+corresponding to *nail biting*, *fidgeting*, and *no eye contact*.
+
+**Anxious (A):**
+
+$$
+P(Y=A \mid X=x) \propto 
+P(A)\, P(NB=1 \mid A)\, P(FI=1 \mid A)\, P(EC=no \mid A)
+$$
+
+$$
+= 0.6 \cdot 0.8 \cdot 0.7 \cdot 0.6
+= 0.2016
+$$
+
+**Not Anxious (NA):**
+
+$$
+P(Y=NA \mid X=x) \propto 
+P(NA)\, P(NB=1 \mid NA)\, P(FI=1 \mid NA)\, P(EC=no \mid NA)
+$$
+
+$$
+= 0.4 \cdot 0.3 \cdot 0.2 \cdot 0.4
+= 0.0096
 $$
 
 ### 4. Make a prediction
