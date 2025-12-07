@@ -24,20 +24,17 @@ In many real-world problems, this assumption is too restrictive. The true relati
 
 In this chapter, we look at four families of methods that allow more flexible regression functions:
 
-- **Polynomial regression**
-- **Stepwise regression** (model selection)
-- **Spline regression**
-- **Local regression** (LOESS / LOWESS)
+- Polynomial regression
+- Stepwise regression
+- Spline regression
+- Local regression
 
-So when is linear regression not enough? Imagine we have one predictor $x$ and a response $y$ generated as:
+Let's start by creating some example data. Imagine we have one predictor $x$ and a response $y$ generated as:
 
 $$
 y = \sin(x) + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0, \sigma^2).
 $$
 
-If we fit a straight line to such data, the model will clearly miss the oscillating pattern. Flexible regression methods aim to recover such non-linear patterns while still being based on the same least squares framework.
-
-To keep things concrete, we will repeatedly use a simple simulated data set:
 
 ```{code-cell} ipython3
 import numpy as np
@@ -56,6 +53,8 @@ fig, ax = plt.subplots()
 ax.scatter(data["x"], data["y"], alpha=0.5)
 ax.set(xlabel="x", ylabel="y");
 ```
+
+If we fit a straight line to such data, the model will clearly miss the oscillating pattern. Flexible regression methods aim to recover such non-linear patterns while still being based on the same least squares framework.
 
 ---
 
@@ -141,7 +140,7 @@ Things to observe:
 
 ---
 
-## Stepwise Regression (0th-Order Splines)
+## Stepwise Functions (0th-Order Splines)
 
 The simple idea:
 
@@ -349,7 +348,19 @@ Local regression methods are very useful for **exploratory analysis**: they give
 
 ---
 
-## Quiz
+## Summary and Quiz
+
+| Method | Key Idea | Flexibility | Pros | Cons |
+|--------|----------|-------------|------|------|
+| **Polynomial Regression** | Add powers of $x$ as predictors: $x, x^2, \dots, x^d$ | Controlled by degree $d$ | Simple to fit with OLS; interpretable for low degrees | Oscillates at boundaries; global changes affect entire curve; high degrees overfit |
+| **Stepwise Regression** | Fit constant values in intervals defined by knots | Controlled by number and placement of knots | Very simple and interpretable; good starting point for understanding splines | Discontinuous at knots; sensitive to knot placement; rough appearance |
+| **Spline Regression** | Piecewise polynomials smoothly joined at knots | Controlled by number of knots and degree | Smooth and flexible; local changes stay local; handles complex patterns | Requires choosing knot locations and number; can overfit with too many knots |
+| **Local Regression (LOWESS)** | Fit weighted regression in neighborhood of each point | Controlled by span/fraction parameter | Data-driven; no global assumptions; excellent for exploration | Computationally intensive; requires choosing span; harder to interpret than parametric models |
+
+
+In practice, these methods are often combined or used alongside regularisation and cross-validation to control overfitting and select tuning parameters (degree, knots, span).
+
+---
 
 ```{code-cell} ipython3
 :tags: ["remove-input"]
