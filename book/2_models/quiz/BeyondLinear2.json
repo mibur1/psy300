@@ -1,0 +1,22 @@
+[{
+    "question": "In local regression, a higher fraction parameter generally results in a",
+    "type": "multiple_choice",
+    "answers": [ 
+        {
+            "answer": "smoother fit",
+            "correct": true
+        },
+        {
+            "answer": "more wiggly fit",
+            "correct": false
+        },
+        {
+            "answer": "higher risk of overfitting",
+            "correct": false
+        },
+        {
+            "answer": "higher risk of underfitting",
+            "correct": true
+        }
+    ]
+}]

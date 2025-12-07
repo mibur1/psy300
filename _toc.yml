@@ -22,6 +22,7 @@ parts:
     - file: book/2_models/4_Logistic_regression
     - file: book/2_models/5_LDA_QDA
     - file: book/2_models/6_Naive_bayes
+    - file: book/2_models/7_Beyond_linear
     - file: book/2_models/todo
     - file: book/2_models/Exercises
 

@@ -1,0 +1,22 @@
+[{
+    "question": "In polynomial regression of degree 3, which of the following is true?",
+    "type": "multiple_choice",
+    "answers": [ 
+        {
+            "answer": "The model is non-linear in the parameters",
+            "correct": false
+        },
+        {
+            "answer": "The model cannot be fit with ordinary least squares",
+            "correct": false
+        },
+        {
+            "answer": "The model includes $x$, $x^2$, and $x^3$ as predictors",
+            "correct": true
+        },
+        {
+            "answer": "The model always overfits the data",
+            "correct": false
+        }
+    ]
+}]
