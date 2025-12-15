@@ -150,7 +150,7 @@ For the B-splines<sup>{{splines}}</sup> we choose:
 
 The output includes parameter estimates for all spline basis functions and categorical variables:
 
-- The `coef` column shows the estimated effect.
+- The `coef` column shows estimated coefficients for the spline basis functions and linear terms (individual spline coefficients are not interpreted directly)
 - The `P>|z|` column tells you whether the estimate is statistically significant
 - The Pseudo `R-squared (CS)` gives a rough measure of model fit (here around 0.70)
 
@@ -161,13 +161,17 @@ import matplotlib.pyplot as plt
 fig, ax = plt.subplots(3,3, figsize=(7,7))
 
 for i, feature in enumerate(spline_features):
-    res.plot_partial(i, cpr=True, ax=ax[i//3, i%3])
+    res.plot_partial(i, plot_se=True, cpr=True, ax=ax[i//3, i%3])
     ax[i//3, i%3].set_title(f"Partial Effect: {feature}")
 
 plt.tight_layout()
 ```
 
-Each subplot shows how the modelled relationship between a feature and the target behaves nonlinearly. The `cpr=True` option adds confidence intervals around the estimated smooth curve.
+Each subplot shows the estimated contribution of the smooth term (for that predictor) to the predictions of the model.
+
+- `plot_se=True` adds a confidence interval for the linear prediction
+- `cpr=True` adds a component-plus-residual plot (a scatterplot of partial working residuals)
+
 
 ```{admonition} Summary
 :class: tip
