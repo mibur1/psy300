@@ -3,7 +3,7 @@
     "type": "multiple_choice",
     "answers": [ 
         {
-            "answer": "GAM can outperform linear models in terms of prediction.",
+            "answer": "GAMs can outperform linear models in terms of prediction.",
             "correct": true
         },
         {

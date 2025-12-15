@@ -17,20 +17,25 @@ myst:
 
 # <i class="fa-solid fa-circle-plus"></i> Generalized Additive Models
 
-Generalized Additive Models (GAMs) offer a powerful and flexible extension to traditional linear models by allowing for **non-linear, additive relationships** between each predictor and the outcome. Unlike standard linear regression, which assumes a strictly linear association between predictors and the response variable, GAMs replace each linear term with a smooth function, enabling the model to better capture complex patterns in the data. Thanks to their additive structure, each predictor contributes independently to the model, making it easy to interpret the effect of each variable. 
+Generalized Additive Models (GAMs) offer a powerful and flexible extension to traditional linear models by allowing **non-linear, additive relationships** between predictors and an outcome variable. Unlike standard linear regression, which assumes a strictly linear association between each predictor and the response, GAMs replace each linear term with a *smooth function*. This enables the model to capture complex patterns in the data while retaining a high degree of interpretability.
 
-So instead of using the standard linear function
+Thanks to their additive structure, each predictor contributes independently to the model, making it straightforward to inspect and interpret the effect of each variable *while holding all others constant*.
 
-$$ y = b_0 + b_1 x_1 + b_2 x_2 + ... + b_i x_i + \epsilon $$
+$$
+y = b_0 + b_1 x_1 + b_2 x_2 + \dots + b_i x_i + \epsilon,
+$$
 
-we have something like this:
+a GAM can be written as
 
-$$ y = b_0 + f_1(x_1) + f_2(x_2) + ... + f_i(x_i) + \epsilon $$
+$$
+y = b_0 + f_1(x_1) + f_2(x_2) + \dots + f_i(x_i) + \epsilon.
+$$
+
 
 
 In short, instead of using fixed slope coefficients $b_i$​ that assume a straight-line relationship, we replace them with flexible (possibly non-linear) smooth functions $f_i$​ for each predictor. These functions can be anything from constant functions and polynomials to wavelets.
 
-So in comparison to simple splines regression which ([last semester](https://mibur1.github.io/psy111/book/statistics/9_Spline_Reg/0_Introduction.html)) was introduced to predict $y$ on the basis of a single predictor $x$, GAMs are a generalization which allows us to predict $y$ given multiple predictors $x_1 ... x_p$.
+So in comparison to simple splines regression which we introduced to predict $y$ on the basis of a single predictor $x$, GAMs are a generalization which allows us to predict $y$ given multiple predictors $x_1 ... x_p$.
 
 
 ```{code-cell} ipython3
@@ -108,7 +113,7 @@ Although the linear regression fits seem to be reasonable, we might suspect that
 
 ## GAMs in Python
 
-There are multiple options for implementing GAMs. We will here use `statsmodels`, as you should already be familiar with it from the previouis semester. The workflow is the following:
+There are multiple options for implementing GAMs. We will here use `statsmodels`, as you are already familiar with it from the previouis sessions. The workflow is the following:
 
 1. Separate smooth (continuous) and categorical features
 2. Create spline basis functions for the continuous features using B-splines
@@ -121,7 +126,11 @@ spline_features = ['age', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
 categorical_features = ['sex']
 
 # Create smoother for continuous variables
-bs = BSplines(X_train[spline_features], df=[6]*len(spline_features), degree=[3]*len(spline_features))
+bs = BSplines(
+    X_train[spline_features],
+    df=[6]*len(spline_features), 
+    degree=[3]*len(spline_features)
+)
 
 # Fit GAM with smoother and exog for categorical
 gam = GLMGam(y_train, exog=X_train[categorical_features], smoother=bs)
