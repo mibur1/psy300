@@ -21,17 +21,11 @@ Generalized Additive Models (GAMs) offer a powerful and flexible extension to tr
 
 Thanks to their additive structure, each predictor contributes independently to the model, making it straightforward to inspect and interpret the effect of each variable *while holding all others constant*.
 
-$$
-y = b_0 + b_1 x_1 + b_2 x_2 + \dots + b_i x_i + \epsilon,
-$$
+$$ y = b_0 + b_1 x_1 + b_2 x_2 + \dots + b_i x_i + \epsilon $$
 
 a GAM can be written as
 
-$$
-y = b_0 + f_1(x_1) + f_2(x_2) + \dots + f_i(x_i) + \epsilon.
-$$
-
-
+$$ y = b_0 + f_1(x_1) + f_2(x_2) + \dots + f_i(x_i) + \epsilon $$
 
 In short, instead of using fixed slope coefficients $b_i$​ that assume a straight-line relationship, we replace them with flexible (possibly non-linear) smooth functions $f_i$​ for each predictor. These functions can be anything from constant functions and polynomials to wavelets.
 
@@ -113,13 +107,16 @@ Although the linear regression fits seem to be reasonable, we might suspect that
 
 ## GAMs in Python
 
-There are multiple options for implementing GAMs. We will here use `statsmodels`, as you are already familiar with it from the previouis sessions. The workflow is the following:
+There are multiple options for implementing GAMs. We will here use `statsmodels`, as you are already familiar with it from the previouis sessions. If you need more information than provided in this session, check out the [documentation](https://www.statsmodels.org/dev/gam.html).
+
+Our workflow will be the following:
 
 1. Separate smooth (continuous) and categorical features
 2. Create spline basis functions for the continuous features using B-splines
 3. Fit the GAM with both the smooth and categorical predictors
 
 ```{code-cell} ipython3
+import statsmodels.api as sm
 from statsmodels.gam.api import GLMGam, BSplines
 
 spline_features = ['age', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
@@ -161,7 +158,7 @@ import matplotlib.pyplot as plt
 fig, ax = plt.subplots(3,3, figsize=(7,7))
 
 for i, feature in enumerate(spline_features):
-    res.plot_partial(i, plot_se=True, cpr=True, ax=ax[i//3, i%3])
+    res.plot_partial(i, plot_se=True, cpr=True, include_constant=False, ax=ax[i//3, i%3])
     ax[i//3, i%3].set_title(f"Partial Effect: {feature}")
 
 plt.tight_layout()
