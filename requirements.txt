@@ -14,4 +14,3 @@ mlxtend
 patsy
 ipywidgets
 ISLP
-xgboost
