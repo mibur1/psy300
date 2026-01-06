@@ -288,6 +288,13 @@ Single trees are prone to overfitting and generally are not competetive when com
 
 Bagging aims to reduce variance by averaging many models trained on different bootstrap samples.
 
+Suppose we train $B$ trees $T_1(x), \dots, T_B(x)$, each on its own bootstrap-resampled training set. At prediction time we combine them:
+
+- **Regression**: take the arithmetic mean $\hat{f}_{\text{bag}}(x)=\frac{1}{B}\sum_{b=1}^{B} T_b(x)$.
+- **Classification**: either average the class probabilities and choose the largest, or take a majority vote across the class labels predicted by the trees.
+
+Because the trees are noisy but (approximately) unbiased, averaging drives down variance while leaving the expected prediction roughly unchanged. This is exactly the same intuition as averaging repeated noisy measurements of the same signal.
+
 ```{code-cell} ipython3
 from sklearn.ensemble import BaggingClassifier
 from sklearn.metrics import accuracy_score
@@ -314,6 +321,8 @@ Random forests improve on bagging by decorrelating the trees. This is done by:
 
 * Considering only a random subset of predictors at each split
 * Drawing a fresh subset at every split
+
+The final prediction still follows the same aggregation rules as bagging (average for regression, majority vote for classification). The extra randomness injected at each split makes the trees less correlated, so the averaging step cancels out even more variance than plain bagging.
 
 ```{code-cell} ipython3
 from sklearn.ensemble import RandomForestClassifier
@@ -347,7 +356,11 @@ The core idea is to combine many weak learners (typically shallow trees) into a 
 4. Fit a new tree that focuses more on the difficult cases
 5. Repeat and combine all trees
 
-Each individual tree is usually very small (often depth 1-3) and only slightly better than random guessing. The strength of boosting comes from accumulating many such small improvements.
+Each individual tree is usually very small (often depth 1-3) and only slightly better than random guessing. The strength of boosting comes from accumulating many such small improvements. If we denote the $m$-th tree by $T_m(x)$ and its fitted weight by $\gamma_m$, the boosted prediction after $M$ trees is typically
+
+$$\hat{F}_M(x) = \sum_{m=1}^{M} \eta \, \gamma_m \, T_m(x)$$
+
+where the learning rate $\eta$ shrinks each tree’s contribution. Because the trees are added sequentially, later trees are trained on the residuals (or gradient directions) left unexplained by the earlier ones.
 
 Boosted trees involve several interacting hyperparameters:
 
