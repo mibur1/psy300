@@ -17,9 +17,9 @@ myst:
 
 # <i class="fa-solid fa-gear"></i> Support Vector Machines
 
-After a brief excursion into generative models such as [LDA & QDA](5_LDA_QDA.md) or [Naïve Bayes](6_Naive_Bayes.md), we will now again discuss a discriminative family of models: Support Vector Machines (SVM). SVMs are powerful supervised learning models used for classification and regression tasks. When used for classification, they are called Support Vector Classifiers (SVC).
+Support Vector Machines (SVMs) are powerful supervised learning models used for classification and regression tasks. When used for classification, they are called Support Vector Classifiers (SVCs).
 
-Let's consider some simulated classification data:
+Let us consider some simulated classification data:
 
 ```{code-cell} ipython3
 import numpy as np
@@ -44,19 +44,17 @@ legend_elements = [
 ax.legend(handles=legend_elements, loc="upper left", handlelength=1);
 ```
 
+## Quiz
+
 ```{code-cell} ipython3
 :tags: ["remove-input"]
 from jupyterquiz import display_quiz
 display_quiz("quiz/SVC.json", shuffle_answers=True)
 ```
 
-```{admonition} Solution
-:class: dropdown
-
-There are infinite ways to separate the two classes because you can find an infinte amount of lines which perfectly separate them.
-```
-
-If we visualise this and add a new data point for classification a potential issue becomes apparent. For some models, this data point would fall into Class 0 and for others into Class 1:
+<details>
+<summary><strong>Show visualisation</strong></summary>
+There are infinite ways to separate the two classes because you can find an infintie amount of lines which perfectly separate them. If we visualise this and add a new data point for classification a potential issue becomes apparent. For some models, this data point would fall into Class 0 and for others into Class 1:
 
 ```{code-cell} ipython3
 :tags: [remove-input]
@@ -74,7 +72,7 @@ for i, (m, b) in enumerate(zip(slopes, intercepts)):
     alpha = 0.4
     ax.plot(x_vals, m * x_vals + b, color='black', alpha=alpha, label='Decision boundaries' if i == 0 else None)
 
-ax.plot(-0.8, 0, 'x', color='red', markeredgewidth=3, markersize=10, label="New data")
+ax.plot(-0.8, 0, 'x', color='red', markeredgewidth=3, markersize=10, label="New observation")
 
 ax.set_xlim(-4, 3)
 ax.set_ylim(-1, 5)
@@ -89,23 +87,24 @@ legend_elements = [
 ax.legend(handles=legend_elements, loc="upper left", handlelength=1);
 ```
 
+
 ## Support Vector Classifiers (SVC)
 
 So evidently, we can't just be satisfied with having an infinite amount of possible solutions we need to come up with a more justifiable one. If you remember, we already did so for linear regression: there, the least squares method chose the line that minimised the total squared distance between predictions and true values.
 
-Support Vector Classifiers have a slightly different method. As Robert Tibshirani put it, they are
+Support Vector Classifiers have a slightly different method. As [Robert Tibshirani](https://en.wikipedia.org/wiki/Robert_Tibshirani) put it, they are
 
 > An approach to the classification problem in a way computer scientists would approach it.
 
-Rather than minimising a squared error, they aim to find the hyperplane that maximises the margin — the distance between the separating hyperplane and the closest data points from each class. The idea is that by maximising this margin, we obtain a decision boundary that is both robust and generalisable.
+Rather than minimising a squared error, they aim to find the hyperplane that maximises the margin, which is the distance between the separating hyperplane and the closest data points from each class. The idea is that by maximising this margin, we obtain a decision boundary that is both robust and generalisable.
+
+A little glossary for SVMs:
 
 - **Hyperplane**: A decision boundary that separates classes. In p dimensions, it is a p−1 dimensional subspace, given by the equation: $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_p X_p = 0$. So in the case of two predictors the hyperplane is one dimensional (a line).
-- **Separating Hyperplane**: A hyperplane that correctly separates the data by class label.
 - **Margin**: The (perpendicular) distance between the hyperplane and the closest training points. A maximal margin classifier chooses the hyperplane that maximises this margin.
 - **Support Vectors**: Observations closest to the decision boundary. They define the margin and the classifier.
 - **Soft Margin**: A method used when the data is not linearly separable. Allows some observations to violate the margin. Controlled via the hyperparameter $C$.
 - **Kernel Trick**: Implicitly maps data into a higher-dimensional space to make it linearly separable using functions like polynomial or RBF (Gaussian) kernels.
-
 
 To formalise this intuition, SVCs look for the maximum margin classifier — a hyperplane that not only separates the classes but does so with the greatest possible distance to the closest training samples. These closest samples are known as support vectors, and they uniquely determine the position of the hyperplane. All other samples can be moved without changing the decision boundary, making SVCs especially robust to outliers away from the margin.
 
@@ -118,7 +117,7 @@ As you learned in the lecture, SVCs are considered to be one of the best "out of
 - When classes are not linearly separable
 - When a robust and generalisable classifier is needed
 
-If the data is not perfectly separable (either because the classes overlap, or the classes are not linearly separable) SVCs become creative in two ways
+If the data is not perfectly separable (either because the classes overlap, or the classes are not linearly separable) SVCs can become creative in two ways as they can:
 
 1. "Soften" what is meant by separating the classes and allow for errors
 2. Map feature space into a higher dimension (kernel trick)
