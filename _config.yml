@@ -9,7 +9,7 @@ copyright: "2025"
 execute:
   execute_notebooks: "auto"
   timeout: 500
-  exclude_patterns: ["*/Exercises.ipynb", "*solutions*.ipynb"]
+  exclude_patterns: ["*/Exercises.ipynb", "*solutions*.ipynb", "README.md"]
 
 
 # Define the name of the latex output file for PDF builds

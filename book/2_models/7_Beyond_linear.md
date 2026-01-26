@@ -80,7 +80,7 @@ Polynomial regression extends the linear model by including powers of $x$ as add
   y \approx \beta_0 + \beta_1 x + \beta_2 x^2 + \dots + \beta_d x^d.
   $$
 
-```{admonition}
+```{admonition} Note
 :class: note 
 
 Polynomial regression models are still **linear models in the parameters** $(\beta_0, \dots, \beta_d)$ – we just feed them transformed inputs $(x, x^2, \dots, x^d)$.
