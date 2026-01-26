@@ -120,8 +120,8 @@ You can use Python in different ways:
 - Through scripts (`.py` files)  
 - Through interactive Jupyter notebooks (`.ipynb` files)
 
-Environment Managers (such as Micromamba) allow you to:
-- Create environments: `micromamba create -n <env_name> python=3.12`  
-- Switch between them: `micromamba activate <env_name>`  
-- Install packages: `pip install <package>` or `micromamba install <package>`
+Environment Managers (such as Miniforge/Conda) allow you to:
+- Create environments: `conda create -n <env_name> python=3.12`  
+- Switch between them: `conda activate <env_name>`  
+- Install packages: `pip install <package>` or `conda install <package>`
 ```
