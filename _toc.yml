@@ -27,7 +27,6 @@ parts:
     - file: book/2_models/9_Trees
     - file: book/2_models/9_2_Gradient_boosting
     - file: book/2_models/10_SVM
-    - file: book/2_models/todo
     - file: book/2_models/Exercises
 
 - caption: Additional Materials

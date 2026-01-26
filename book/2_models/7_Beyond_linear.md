@@ -140,7 +140,7 @@ Things to observe:
 
 ---
 
-## Stepwise Functions (0th-Order Splines)
+## Piecewise Constant Regression
 
 The simple idea:
 
@@ -160,9 +160,7 @@ $$
 y \approx \beta_0 + \beta_1 I_1(x) + \dots + \beta_{K+1} I_{K+1}(x),
 $$
 
-which produces a **piecewise constant** (stepwise) regression function.
-
-This is equivalent to a **B-spline of degree 0** (a “zero-order spline”).
+which produces a **piecewise constant** (stepwise) regression function. This is equivalent to a **B-spline of degree 0** (a “zero-order spline”).
 
 Pros:
 
@@ -350,15 +348,17 @@ Local regression methods are very useful for **exploratory analysis**: they give
 
 ## Summary and Quiz
 
-| Method | Key Idea | Flexibility | Pros | Cons |
-|--------|----------|-------------|------|------|
-| **Polynomial Regression** | Add powers of $x$ as predictors: $x, x^2, \dots, x^d$ | Controlled by degree $d$ | Simple to fit with OLS; interpretable for low degrees | Oscillates at boundaries; global changes affect entire curve; high degrees overfit |
-| **Stepwise Regression** | Fit constant values in intervals defined by knots | Controlled by number and placement of knots | Very simple and interpretable; good starting point for understanding splines | Discontinuous at knots; sensitive to knot placement; rough appearance |
-| **Spline Regression** | Piecewise polynomials smoothly joined at knots | Controlled by number of knots and degree | Smooth and flexible; local changes stay local; handles complex patterns | Requires choosing knot locations and number; can overfit with too many knots |
-| **Local Regression (LOWESS)** | Fit weighted regression in neighborhood of each point | Controlled by span/fraction parameter | Data-driven; no global assumptions; excellent for exploration | Computationally intensive; requires choosing span; harder to interpret than parametric models |
+| Method                            | Key Idea                                          | Flexibility                    | Pros                                  | Cons |
+|-----------------------------------|---------------------------------------------------|--------------------------------|---------------------------------------|------------------------------------------------------------------------|
+| **Polynomial Regression**         | Powers of $x$ as predictors: $x, x^2, \dots, x^d$ | Controlled by degree $d$       | Simple to fit with OLS; interpretable | Oscillates at boundaries; global changes affect entire curve           |
+| **Piecewise Constant Regression** | Constant values in intervals defined by knots     | Controlled by knots            | Simple and interpretable              | Discontinuous at knots; sensitive to knot placement                    |
+| **Spline Regression**             | Piecewise polynomials smoothly joined at knots    | Controlled by knots and degree | Smooth and flexible; mostly local     | Requires choosing knots; can overfit with many knots                   |
+| **Local Regression (LOWESS)**     | Weighted regression in neighborhood of each point | Controlled by span/fraction    | Data-driven; no global assumptions    | Computationally intensive; requires choosing span; harder to interpret |
 
 
-In practice, these methods are often combined or used alongside regularisation and cross-validation to control overfitting and select tuning parameters (degree, knots, span).
+In the lecture, all methods except simple polynomial regression are considered local models. In piecewise constant regression, only the information within each bin contributes to the fitted value in that region. Spline regression is also largely local, but neighbouring intervals are coupled through smoothness constraints at the knots, which introduces a limited amount of global structure.
+
+In practice, these methods are often combined with regularisation and cross-validation to control overfitting and to select tuning parameters such as the degree, number and location of knots, or the span.
 
 ---
 
