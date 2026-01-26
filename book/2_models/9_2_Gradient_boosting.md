@@ -23,7 +23,7 @@ This notebook therefore serves two purposes:
 
 ---
 
-## Intuition: from weak regressors to a strong predictor
+## Intuition: Weak regressors can form strong predictors
 
 Suppose we have a regression problem with inputs $x_i$ and continuous targets $y_i$.
 
@@ -38,7 +38,7 @@ The basic boosting idea is:
 
 ---
 
-## AdaBoost for regression: basic idea
+## AdaBoost for regression
 
 AdaBoost implements this idea by assigning weights to observations. Observations that are predicted poorly receive larger weights and therefore influence the next model more strongly.
 
@@ -54,9 +54,7 @@ which change after each boosting iteration $m$. Initially, all observations are 
 
 $$w_i^{(1)} = \frac{1}{N}$$
 
-
-
-### Choice of weak learner
+**Choice of weak learner**
 
 In regression settings, AdaBoost typically relies on very simple base learners, such as
 
@@ -66,8 +64,7 @@ In regression settings, AdaBoost typically relies on very simple base learners, 
 The goal is not to fit the data well in a single step, but to make small, incremental improvements.
 
 
-
-### Measuring regression error in AdaBoost
+**Measuring regression error**
 
 For regression, misclassification counts are no longer meaningful. Instead, prediction errors are measured using absolute deviations:
 
@@ -80,7 +77,7 @@ $$L_i = \frac{e_i}{\max_j e_j}$$
 so that $0 \le L_i \le 1$. Observations with larger errors receive stronger penalties.
 
 
-### AdaBoost.R2 algorithm (conceptual)
+### The AdaBoost.R2 algorithm
 
 For boosting rounds $m = 1, \dots, M$:
 
@@ -103,7 +100,7 @@ $$w_i^{(m+1)} = w_i^{(m)} \cdot \exp(\alpha_m L_i)$$
 Observations with large errors gain influence over subsequent regressors.
 
 
-### Final AdaBoost prediction
+**Final prediction**
 
 The final AdaBoost regression model is a weighted sum of weak regressors:
 
@@ -114,7 +111,7 @@ $$
 Each regressor contributes according to its predictive performance.
 
 
-### Limitations of AdaBoost for regression
+### Limitations
 
 While AdaBoost captures the idea of sequential error correction, it has several limitations in regression problems:
 
@@ -134,7 +131,7 @@ Gradient boosting reformulates boosting as an explicit optimisation problem. Ins
 The key idea is to view boosting as gradient descent in function space.
 
 
-### Gradient boosting for regression: core idea
+### Core idea
 
 1. Start with a simple initial model, usually the mean of the target values  
 2. Compute residuals between observed targets and current predictions  
@@ -150,10 +147,7 @@ $$\hat{F}_M(x) = \sum_{m=1}^M \eta \, T_m(x)$$
 
 where $\eta$ denotes the learning rate.
 
-
-### Why gradient boosting is preferred in practice
-
-Gradient boosting
+Gradient boosting offers several advantages. It:
 
 - works naturally for regression problems  
 - allows arbitrary differentiable loss functions  
@@ -163,7 +157,7 @@ Gradient boosting
 For these reasons, gradient boosting has largely replaced AdaBoost in regression settings.
 
 
-### Example: gradient boosting in scikit-learn
+### Example
 
 ```{code-cell} ipython3
 import numpy as np
