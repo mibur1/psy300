@@ -382,6 +382,6 @@ ax.set_xticklabels(xticklabels, rotation=45);
 - Even though we did not do so here, it is often useful to scale the predictors (see exercise)
 ```
 
-## Additional References
+## References
 
-For more information and a cool example for facial recognition, you can have look at the [Python Data Science Handbook](https://jakevdp.github.io/PythonDataScienceHandbook/05.07-support-vector-machines.html) notebook.
+This chapter was inspired by the [Python Data Science Handbook](https://jakevdp.github.io/PythonDataScienceHandbook/05.07-support-vector-machines.html) notebook. I encourage you to give it a read for more information and a cool example on facial recognition!
