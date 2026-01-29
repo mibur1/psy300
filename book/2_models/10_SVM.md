@@ -17,9 +17,9 @@ myst:
 
 # <i class="fa-solid fa-gear"></i> Support Vector Machines
 
-Support Vector Machines (SVMs) are powerful supervised learning models used for classification and regression tasks. When used for classification, they are called Support Vector Classifiers (SVCs).
+Support Vector Machines (SVMs) are supervised max-margin learning models used for classification and regression. In classification, they maximise the separation between classes, while in regression they learn a function that stays within an $\epsilon$-insensitive margin around the data.
 
-Let us consider some simulated classification data:
+Let us consider some simulated classification data as an example:
 
 ```{code-cell} ipython3
 import numpy as np
