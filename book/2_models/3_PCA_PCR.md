@@ -211,9 +211,11 @@ print(f"PCR (2 components) R²: {pcr_2.score(X_test, y_test):.3f}")
 
 ## Partial Least Squares Regression
 
-While PCR focuses purely on the variance structure of `X`, Partial Least Squares (PLS) introduces supervision into the process and can be thought of as a supervised extension of PCR.
+While Principal Component Regression (PCR) reduces dimensionality by extracting directions that maximise variance in $X$, Partial Least Squares Regression (PLS) incorporates information from the response variable $y$.
 
-Instead of finding directions that maximise variance in `X`, PLS finds latent components that maximise the covariance between `X` and `y`. This allows PLS to identify directions that are both informative about `y` and stable under multicollinearity, even if they explain only modest variance in `X`. As a result, PLS often performs better than PCR when the most predictive information lies in low-variance directions (a situation where PCR tends to fail).
+PLS constructs latent components as linear combinations of the predictors such that each component has high covariance with the response while also capturing variation in $X$. These components are extracted sequentially and used as predictors in a regression model.
+
+Because PLS considers the relationship between $X$ and $y$ when defining components, it can identify predictive directions even when they correspond to relatively low variance in $X$, a situation where PCR may fail.
 
 Fitting a model is straightforward:
 
