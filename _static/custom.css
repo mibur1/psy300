@@ -52,6 +52,18 @@ html.dark .Feedback {
   overflow: hidden;
 }
 
+/* Hide the toolbar that Plotly fades in on hover (zoom, pan, autoscale,
+   camera, "produced with plotly" logo). It overlaps the top-right of the
+   figure and is mostly noise for a textbook.
+
+   Nothing is lost interactively: drag still zooms, double-click still
+   resets the axes, and 3D plots still rotate. Delete this rule to bring
+   the toolbar back, or scope it (e.g. `#some-figure .modebar-container`)
+   to hide it on specific figures only.                                 */
+.js-plotly-plot .modebar-container {
+  display: none !important;
+}
+
 /* --- Tables --------------------------------------------------------
    Several chapters use wide comparison tables. Let them scroll instead
    of forcing the whole page to scroll horizontally.                   */
