@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 env:
+  # Jupyter Book 2 reads BASE_URL when building the static site
   BASE_URL: /${{ github.event.repository.name }}
 
 concurrency:
@@ -19,12 +21,20 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: "3.12"
+          cache: pip
+
+      # The site template is fetched and bundled with npm, so Node must be
+      # available. Do not delete /usr/local/lib/node_modules here.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Free disk space
         run: |
@@ -32,17 +42,17 @@ jobs:
           sudo rm -rf /opt/ghc || true
           sudo rm -rf /usr/share/dotnet || true
           sudo rm -rf /usr/local/share/powershell || true
-          sudo rm -rf /usr/local/lib/node_modules || true
           sudo apt-get clean
           docker system prune -af || true
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Build the book
         run: |
-          jupyter-book build .
+          jupyter book build --html --execute
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
