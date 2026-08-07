@@ -9,7 +9,19 @@ kernelspec:
 
 ```{code-cell} ipython3
 :tags: [remove-cell]
+import warnings
+import numpy as np
 import plotly.io as pio
+
+# Later on we deliberately fit polynomials of up to degree 29 to 30 points.
+# That is genuinely ill-conditioned - which is exactly the lesson - so numpy's
+# RankWarning is expected and would only be noise on the page.
+# Note: filtering by `message=` does NOT work here, it has to be by category.
+try:
+    RankWarning = np.exceptions.RankWarning   # numpy >= 1.25
+except AttributeError:
+    RankWarning = np.RankWarning              # numpy < 1.25
+warnings.filterwarnings("ignore", category=RankWarning)
 
 # A neutral Plotly look that stays legible in both the light and the dark
 # version of the site: transparent paper, faint plot background, grey text.
@@ -40,9 +52,6 @@ Here you can see the data in a scatterplot, with a linear regression model fitte
 
 ```{code-cell} ipython3
 :tags: [remove-input]
-import warnings
-warnings.filterwarnings("ignore", message=".*Polyfit may be poorly conditioned.*")
-
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go

@@ -44,17 +44,6 @@ html.dark .Feedback {
   display: none;
 }
 
-/* --- Embedded interactive editors (trinket.io) --------------------- */
-iframe[src*="trinket.io"] {
-  border: 1px solid var(--color-border, #d1d5db);
-  border-radius: 6px;
-  margin: 1rem 0;
-}
-
-html.dark iframe[src*="trinket.io"] {
-  border-color: #475569;
-}
-
 /* --- Plotly figures ------------------------------------------------
    Plotly draws its own white paper background, which looks harsh on a
    dark page. Round the corners so it reads as a deliberate panel.     */

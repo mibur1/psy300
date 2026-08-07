@@ -89,8 +89,6 @@ Kernel
 
 ## Naming traps in scikit-learn
 
-These catch nearly everyone at least once.
-
 ```{warning} Where the names do not match the lecture
 - **`alpha` is $\lambda$.** In `Ridge`, `Lasso` and `ElasticNet`, `alpha` is the regularisation *strength*. The elastic net *mixing* parameter, which the lecture calls $\alpha$, is `l1_ratio`.
 - **`C` is inverted.** In `SVC`, a *small* `C` gives a *wide* margin and more violations. This is the opposite direction from the budget parameter in the lecture.
@@ -113,18 +111,3 @@ Almost every chapter is a variation on the same five steps:
 ```{tip} Use a Pipeline
 Wrapping the preprocessing and the model into `make_pipeline(StandardScaler(), Ridge())` makes steps 2 and 3 leak-proof by construction: the scaler is refitted inside every CV fold automatically.
 ```
-
-## Which method should I reach for?
-
-| Situation | Start with |
-|---|---|
-| Continuous target, few predictors | linear regression |
-| Continuous target, many correlated predictors | ridge, elastic net, PCR/PLS |
-| Continuous target, want automatic variable selection | lasso, stepwise selection |
-| Continuous target, clearly non-linear | splines, GAM, LOWESS |
-| Binary target, want interpretable coefficients | logistic regression |
-| Several classes, roughly Gaussian features | LDA (equal spread) or QDA (unequal spread) |
-| Many features, small sample, need a fast baseline | Naïve Bayes |
-| Complex boundary, moderate sample size | SVM with an RBF kernel |
-| Mixed feature types, interactions, no scaling wanted | trees, random forest, gradient boosting |
-| Best raw predictive accuracy on tabular data | gradient boosting |

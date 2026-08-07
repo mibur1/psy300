@@ -147,9 +147,17 @@ print(f"range {split_scores.min():.3f} – {split_scores.max():.3f}")
 
 The spread is remarkable. Depending on nothing but the random seed, the very same model looks anywhere from clearly mediocre to surprisingly good. Reporting a single split as *the* performance of your model is therefore reporting a coin flip.
 
-**Hands on:** in the editor below, we perform a classification for two splits in the data. Please modify the code to first use 80% of the data for training and 20% for testing, and then 20% for training and 80% for testing. Before evaluating each model, think about what kind of results you would expect. Which model do you think will perform better?
+**Try it yourself:** the split *ratio* matters too. Before running the cell below, think about what you expect: is it better to train on 80% of the data and test on 20%, or the other way round? Then change `test_size` and see whether the result matches your intuition.
 
-<iframe src="https://trinket.io/embed/python3/48c2802e1e16" width="100%" height="356" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+```{code-cell} ipython3
+for test_size in [0.2, 0.5, 0.8]:
+    X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=test_size, random_state=42)
+    acc = svm.SVC(kernel='linear').fit(X_tr, y_tr).score(X_te, y_te)
+    print(f"train on {1 - test_size:.0%} / test on {test_size:.0%}"
+          f"   ->   {len(X_tr):>3} training samples, accuracy = {acc:.3f}")
+```
+
+Training on more data generally gives a better model, but it also leaves fewer test samples, so the accuracy estimate itself becomes noisier. That is the tradeoff the validation set approach cannot escape.
 
 ```{hint} Summary
 The validation set approach is a quick and easy way to check how well a model performs. However, it has a major flaw: it puts all its trust in a single data split, which can doom a great model or trick us into thinking a weak model performs better than it actually does.
@@ -242,9 +250,17 @@ Choosing an appropriate $k$ involves a tradeoff between bias, variance, and comp
 Generally speaking, $k=5$ or $k=10$ are common choices.
 ```
 
-**Try it yourself:** change the number of folds $k$ below and observe how the predictions change. What do you feel is a good tradeoff between bias and variance?
+**Try it yourself:** change the number of folds $k$ below and watch what happens. What do you feel is a good tradeoff?
 
-<iframe src="https://trinket.io/embed/python3/c46516cf56de" width="100%" height="356" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+```{code-cell} ipython3
+for k in [2, 5, 10, 20, 50]:
+    cv = KFold(n_splits=k, shuffle=True, random_state=42)
+    s = cross_val_score(svm.SVC(kernel='linear'), X, y, cv=cv)
+    print(f"k = {k:>2}   mean accuracy = {s.mean():.3f}   "
+          f"std across folds = {s.std():.3f}   ({k} model fits)")
+```
+
+Notice that the *mean* barely moves once $k \ge 5$, while the standard deviation across folds keeps growing — with more folds each test set is smaller, so each individual fold score is noisier even though their average is stable. The extra compute buys you very little beyond $k = 5$ or $10$.
 
 ### Leave-one-out CV (LOOCV)
 

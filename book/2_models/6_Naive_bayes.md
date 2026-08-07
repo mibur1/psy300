@@ -318,7 +318,7 @@ legend_elements = [
            markeredgewidth=0, label='Class 1', markersize=8),
     Line2D([], [], color='black', linestyle='-', linewidth=2, label='Decision boundary')
 ]
-ax.legend(handles=legend_elements);
+ax.legend(handles=legend_elements, loc="upper left");  # explicit loc: "best" is slow on a dense mesh
 ```
 
 This plot visualises how the Gaussian Naïve Bayes model estimates the class distributions:
