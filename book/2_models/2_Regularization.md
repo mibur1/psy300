@@ -1,21 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: Regularisation
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
-myst:
-  substitutions:
-    lambda: 1
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-puzzle-piece"></i> Regularisation
+# 🧩 Regularisation
 
 Building on subset selection, an alternative approach is to include all *p* predictors in the model but apply regularization, shrinking the coefficient estimates toward zero relative to the least squares estimates. This reduces model complexity without fully discarding variables. Though it introduces some bias, it often lowers variance and improves test performance. 
 
@@ -82,15 +71,14 @@ Combined:
 - $\sum_{i=1}^{n}\bigl(y_i - \mathbf X_i\,\boldsymbol\beta\bigr)^2$ is the residual sum of squares (RSS)
 - $\lambda\sum_{j=1}^{p} \beta_j^2$ is the L2 penalty on the coefficients
 
-```{admonition} The λ parameter
-:class: note 
+```{note} The λ parameter
 
-λ controls the regulariztation strength:
+λ controls the regularization strength:
 
-- λ = 0: The penalty term has no effect (normal OLS regression)
-- λ > 0: The impact of the penalty increases proportinal to λ
+- λ = 0: the penalty term has no effect (ordinary least squares regression)
+- λ > 0: the impact of the penalty grows with λ
 
-Lambda is a hyperparameter which we need to chose ourselves (through e.g. cross validation). 
+Lambda is a hyperparameter which we need to choose ourselves (e.g. through cross-validation).
 ```
 
 We can implement Ridge regression as follows:
@@ -117,7 +105,7 @@ lambda_range = np.linspace(0.001, 150, 100)
 **Step 3:** For each lambda, we will perform ridge regression on the training data. Cross-validation is then used to identify the optimal lambda that minimizes prediction error:
 
 ```{margin}
-Note: In `sklearn`, the lamda parameter is called alpha.
+Note: in `sklearn`, the $\lambda$ parameter is called `alpha`.
 ```
 
 ```{code-cell} ipython3
@@ -175,6 +163,77 @@ fig, ax = plt.subplots()
 ax.plot(alphas, coefs)
 ax.set(title="Ridge coefficients", xlabel="Lambda", ylabel="Beta");
 ```
+
+### Interactive: watch the coefficients shrink
+
+The plot above shows all the coefficient paths at once, which is informative but hard to read. Below, **drag the slider** to pick a single value of λ and see what the resulting model actually looks like — both the coefficients and what the shrinkage costs (or gains) you on the test set.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+from sklearn.linear_model import Ridge, Lasso
+
+# Neutral template that stays legible in light and dark mode
+tpl = pio.templates["plotly_white"]
+tpl.layout.paper_bgcolor = "rgba(0,0,0,0)"
+tpl.layout.plot_bgcolor = "rgba(128,128,128,0.08)"
+tpl.layout.font.color = "#888888"
+pio.templates["psy300"] = tpl
+pio.templates.default = "psy300"
+
+features = list(X_train.columns)
+lambdas = np.round(np.logspace(-2, 2.4, 25), 3)
+
+traces, steps, info = [], [], []
+for i, lam in enumerate(lambdas):
+    ridge = Ridge(alpha=lam).fit(X_train_scaled, y_train)
+    lasso = Lasso(alpha=lam, max_iter=10000).fit(X_train_scaled, y_train)
+
+    traces.append(go.Bar(x=features, y=ridge.coef_, name="Ridge",
+                         marker_color="#4c72b0", visible=False))
+    traces.append(go.Bar(x=features, y=lasso.coef_, name="Lasso",
+                         marker_color="#dd8452", visible=False))
+
+    info.append(
+        f"λ = {lam:g}   |   "
+        f"Ridge test R² = {ridge.score(X_test_scaled, y_test):.3f}   |   "
+        f"Lasso test R² = {lasso.score(X_test_scaled, y_test):.3f}   |   "
+        f"Lasso coefficients set to zero: {int(np.sum(lasso.coef_ == 0))}/{len(features)}"
+    )
+
+traces[0].visible = True
+traces[1].visible = True
+
+for i, lam in enumerate(lambdas):
+    vis = [False] * len(traces)
+    vis[2 * i] = vis[2 * i + 1] = True
+    steps.append(dict(method="update", label=f"{lam:g}",
+                      args=[{"visible": vis},
+                            {"annotations": [dict(x=0.5, y=1.14, xref="paper", yref="paper",
+                                                  text=info[i], showarrow=False,
+                                                  font=dict(size=13), xanchor="center")]}]))
+
+fig = go.Figure(data=traces)
+fig.update_layout(
+    barmode="group",
+    sliders=[dict(active=0, currentvalue={"prefix": "Regularisation strength λ = "},
+                  pad={"t": 40}, steps=steps)],
+    annotations=[dict(x=0.5, y=1.14, xref="paper", yref="paper", text=info[0],
+                      showarrow=False, font=dict(size=13), xanchor="center")],
+    yaxis_title="Coefficient (standardised predictors)",
+    margin=dict(l=10, r=10, t=90, b=20),
+    height=470,
+)
+fig
+```
+
+Two behaviours become obvious as you move the slider to the right:
+
+- **Ridge** shrinks every coefficient smoothly towards zero, but never quite reaches it. All predictors stay in the model.
+- **Lasso** switches predictors off one after another. The counter above the plot shows how many coefficients are exactly zero — this is feature selection happening as a side effect of the penalty.
 
 ## Lasso Regression
 
@@ -234,7 +293,7 @@ Even though both Ridge and Lasso limit the size of the coefficients, how they li
 
 
 ```{figure} figures/Budget_LassoRidge.png 
-:name: Budget Lasso vs Ridge Regression
+:name: fig-budget-lasso-ridge
 :alt: Budget
 :align: center
 
@@ -251,7 +310,7 @@ Neither Ridge nor Lasso will universally be better than the other. The main diff
 
 Another point to note is their response to multicollinearity:
 
-  - Ridge shares the weight among collinear features, keep them all (shrink but don’t zero)
+  - Ridge shares the weight among collinear features, keeping them all (shrink but don't zero)
   - Lasso chooses a subset (often just one) from each collinear group and zeroes out the rest
 
 This is where elastic net regression comes into play. Elastic net is a combination of Ridge and Lasso:
@@ -338,4 +397,4 @@ plt.tight_layout()
 plt.show()
 ```
 
-**Now it's your turn:** Head to the [exercise section](Exercises) for Exercise 2, in which you will implement a Lasso model.
+**Now it's your turn:** head to the [exercise section](Exercises.ipynb) for Exercise 2, in which you will implement a Lasso model.

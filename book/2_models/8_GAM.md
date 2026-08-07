@@ -1,21 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: GAMs
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
-myst:
-  substitutions:
-    splines: 1
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-circle-plus"></i> Generalized Additive Models
+# ➕ Generalized Additive Models
 
 Generalized Additive Models (GAMs) offer a powerful and flexible extension to traditional linear models by allowing **non-linear, additive relationships** between predictors and an outcome variable. Unlike standard linear regression, which assumes a strictly linear association between each predictor and the response, GAMs replace each linear term with a *smooth function*. This enables the model to capture complex patterns in the data while retaining a high degree of interpretability.
 
@@ -33,7 +22,7 @@ So in comparison to simple splines regression which we introduced to predict $y$
 
 
 ```{code-cell} ipython3
-:tags: ["remove-input"]
+:tags: [remove-input]
 from jupyterquiz import display_quiz
 display_quiz("quiz/GAM.json", shuffle_answers=False)
 ```
@@ -64,7 +53,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 To explore the relationships between each feature and the target, we plot each predictor against the disease progression outcome. These scatter plots with simple linear regressions help us to visually assess whether the relationship between a feature and the target is linear or if we need a more flexible model approach:
 
 ```{code-cell} ipython3
-:tags: ["remove-input"]
+:tags: [remove-input]
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -107,7 +96,7 @@ Although the linear regression fits seem to be reasonable, we might suspect that
 
 ## GAMs in Python
 
-There are multiple options for implementing GAMs. We will here use `statsmodels`, as you are already familiar with it from the previouis sessions. If you need more information than provided in this session, check out the [documentation](https://www.statsmodels.org/dev/gam.html).
+There are multiple options for implementing GAMs. We will here use `statsmodels`, as you are already familiar with it from the previous sessions. If you need more information than provided in this session, check out the [documentation](https://www.statsmodels.org/dev/gam.html).
 
 Our workflow will be the following:
 
@@ -140,7 +129,7 @@ print(res.summary())
 Remember: B-splines are a series of piecewise polynomial functions that are joined smoothly at certain points called knots.
 ```
 
-For the B-splines<sup>{{splines}}</sup> we choose:
+For the B-splines we choose:
 
 - `df=[6]*len(spline_features)` -> 6 basis functions per feature
 - `degree=[3]*len(spline_features)` -> cubic splines (degree 3)
@@ -170,8 +159,7 @@ Each subplot shows the estimated contribution of the smooth term (for that predi
 - `cpr=True` adds a component-plus-residual plot (a scatterplot of partial working residuals)
 
 
-```{admonition} Summary
-:class: tip
+```{tip} Summary
 
 - GAMs allow flexible, interpretable models where you don’t assume linearity for every predictor.
 - `statsmodels` makes it easy to combine smooth terms (B-splines or alternatively Cyclic Cubic Splines) with categorical or linear predictors.

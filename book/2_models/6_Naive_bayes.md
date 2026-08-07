@@ -1,21 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: Naïve Bayes
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
-myst:
-  substitutions:
-    ref_test: 1
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-lightbulb"></i> Naïve Bayes
+# 💡 Naïve Bayes
 
 Naïve Bayes classifiers, like LDA and QDA, are generative models. They aim to model how the data was generated for each class and use this knowledge to make predictions. The foundation of Naïve Bayes is Bayes’ Theorem.
 
@@ -207,13 +196,12 @@ $$
 ### Quiz
 
 ```{code-cell} ipython3
-:tags: ["remove-input"]
+:tags: [remove-input]
 from jupyterquiz import display_quiz
 display_quiz("quiz/NaiveBayes.json", shuffle_answers=True)
 ```
 
-```{admonition} Solution
-:class: dropdown
+```{dropdown} Solution
 
 To solve this, we use the same priors and likelihoods as before, but change the feature values:
 
@@ -232,15 +220,10 @@ $0.6 \cdot (1 - 0.8) \cdot 0.7 \cdot (1 - 0.6) = 0.6 \cdot 0.2 \cdot 0.7 \cdot 0
 
 $0.4 \cdot (1 - 0.3) \cdot 0.2 \cdot (1 - 0.4) = 0.4 \cdot 0.7 \cdot 0.2 \cdot 0.6 = 0.0336$
 
-Result: Both scores are equal -> it's a tie.
+Both scores are equal, so the correct answer is **Tie**.
 
+In case of a tie, the model would likely default to the class with the higher prior. However, this is subject to the specific implementation of the model — `sklearn` breaks ties by picking the class that comes first in `classes_`.
 ```
-
----
-
-**Result:** Both scores are equal → it's a **tie**.
-
-✅ **Correct answer: Tie.** In case of a tie, the model would likely default to the class with the higher prior. However, this might be subject to the specific implementation of the model.
 
 ---
 
@@ -361,4 +344,4 @@ This plot visualises how the Gaussian Naïve Bayes model estimates the class dis
 | **Good for High Dimensions?** | ❌ Not ideal                    | ❌ Risk of overfitting         | ✅ Yes                                        |
 | **When to Use**               | Equal spread across classes     | Unequal class spreads          | Many features, text data, simple baseline     |
 
-That's it! You can now head to [Exercise 6](Exercises) to apply LDA, QDA, and Naïve Bayes yourself 😄
+That's it! You can now head to [Exercise 5](Exercises.ipynb) to apply LDA, QDA, and Naïve Bayes yourself 😄
