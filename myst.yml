@@ -1,0 +1,93 @@
+# Jupyter Book 2 configuration
+# Reference: https://mystmd.org/guide/frontmatter
+version: 1
+
+project:
+  id: psy300-statistical-learning
+  title: Welcome to psy300!
+  description: >-
+    Course materials for the psy300 (ds300) seminar of the Data Science and
+    Machine Learning Master's programme at Carl von Ossietzky Universität Oldenburg.
+  copyright: "2025"
+  authors:
+    - name: Micha Burkhardt
+      affiliation: Carl von Ossietzky Universität Oldenburg
+    - name: Constanze Buschmann
+      affiliation: Carl von Ossietzky Universität Oldenburg
+  github: https://github.com/mibur1/psy300
+
+  # Enables the "launch in Jupyter" menu on notebook pages
+  jupyter: true
+
+  # Hover definitions for recurring acronyms
+  abbreviations:
+    CV: Cross-Validation
+    LOOCV: Leave-One-Out Cross-Validation
+    MSE: Mean Squared Error
+    RMSE: Root Mean Squared Error
+    RSS: Residual Sum of Squares
+    OLS: Ordinary Least Squares
+    OOB: Out-Of-Bag
+    PCA: Principal Component Analysis
+    PCR: Principal Component Regression
+    PLS: Partial Least Squares
+    LDA: Linear Discriminant Analysis
+    QDA: Quadratic Discriminant Analysis
+    GAM: Generalized Additive Model
+    SVM: Support Vector Machine
+    SVC: Support Vector Classifier
+    RBF: Radial Basis Function
+    LOWESS: Locally Weighted Scatterplot Smoothing
+    EFS: Exhaustive Feature Selection
+    SFS: Sequential Feature Selection
+
+  toc:
+    - file: book/introduction.md
+
+    - title: Machine Learning Basics
+      children:
+        - file: book/1_basics/0_installation.md
+        - file: book/1_basics/0_refresher.md
+        - file: book/1_basics/1_introduction.md
+        - file: book/1_basics/2_bias_variance.md
+        - file: book/1_basics/3_resampling.md
+        - file: book/1_basics/Exercises.ipynb
+
+    - title: Modelling
+      children:
+        - file: book/2_models/1_Model_selection.md
+        - file: book/2_models/2_Regularization.md
+        - file: book/2_models/3_PCA_PCR.md
+        - file: book/2_models/4_Logistic_regression.md
+        - file: book/2_models/5_LDA_QDA.md
+        - file: book/2_models/6_Naive_bayes.md
+        - file: book/2_models/7_Beyond_linear.md
+        - file: book/2_models/8_GAM.md
+        - file: book/2_models/9_Trees.md
+        - file: book/2_models/9_2_Gradient_boosting.md
+        - file: book/2_models/10_SVM.md
+        - file: book/2_models/Exercises.ipynb
+
+    - title: Additional Materials
+      children:
+        - file: book/solutions/solutions.md
+          children:
+            - file: book/solutions/solutions_1.ipynb
+            - file: book/solutions/solutions_2.ipynb
+        - file: book/glossary.md
+
+site:
+  template: book-theme
+  title: Statistical Learning with Python
+  options:
+    logo: logo.png
+    logo_dark: logo.png
+    favicon: logo.png
+    style: _static/custom.css
+    # Keep the folder structure in the URLs. Required here because two
+    # different chapters both contain a file called "Exercises".
+    folders: true
+    outline_maxdepth: 3
+    # The same two authors appear on all 23 pages; showing the block once on
+    # the landing page is enough.
+    hide_authors: true

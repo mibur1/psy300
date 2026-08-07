@@ -1,0 +1,75 @@
+/* ------------------------------------------------------------------
+   psy300 - custom styling on top of the MyST book theme
+   ------------------------------------------------------------------ */
+
+/* --- jupyterquiz / jupytercards -----------------------------------
+   Both libraries ship light-mode colours only. The rules below make
+   them legible when the reader switches the site to dark mode.       */
+
+html.dark .Quiz,
+html.dark .quiz-body,
+html.dark .card-body {
+  color: inherit;
+}
+
+html.dark .Answer,
+html.dark .MultipleAnswer {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+html.dark .Answer:hover,
+html.dark .MultipleAnswer:hover {
+  background-color: #334155 !important;
+}
+
+html.dark .Feedback {
+  color: #cbd5e1 !important;
+}
+
+/* Give quizzes and flashcards a bit of breathing room */
+.Quiz,
+.jupytercards {
+  margin: 1.25rem 0;
+}
+
+/* --- Table of contents on the landing page -------------------------
+   The {tableofcontents} directive always emits the project root as its
+   first entry, which on the landing page is a link to the page you are
+   already on. Drop it. Matching on position rather than on href keeps
+   this working under BASE_URL (GitHub Pages serves the book from
+   /psy300, so the root link is not "/"").                              */
+.toc-hide-self > ul > li:first-child {
+  display: none;
+}
+
+/* --- Plotly figures ------------------------------------------------
+   Plotly draws its own white paper background, which looks harsh on a
+   dark page. Round the corners so it reads as a deliberate panel.     */
+.js-plotly-plot {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Hide the toolbar that Plotly fades in on hover (zoom, pan, autoscale,
+   camera, "produced with plotly" logo). It overlaps the top-right of the
+   figure and is mostly noise for a textbook.
+
+   Nothing is lost interactively: drag still zooms, double-click still
+   resets the axes, and 3D plots still rotate. Delete this rule to bring
+   the toolbar back, or scope it (e.g. `#some-figure .modebar-container`)
+   to hide it on specific figures only.                                 */
+.js-plotly-plot .modebar-container {
+  display: none !important;
+}
+
+/* --- Tables --------------------------------------------------------
+   Several chapters use wide comparison tables. Let them scroll instead
+   of forcing the whole page to scroll horizontally.                   */
+.myst-table,
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}

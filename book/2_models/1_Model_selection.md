@@ -1,18 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: Model selection
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-square-check"></i> Model Selection
+# ✅ Model Selection
 
 As data scientists, you often have to work with huge amounts of data. For example, smart phones produce thousands of measurements a day. Having more information can, in theory, help us make better predictions, but it also brings risks: too many variables can make analyses infeasible, lead to false discoveries, or cause models to learn noise instead of real effects. 
 
@@ -25,7 +17,7 @@ As data scientists, you often have to work with huge amounts of data. For exampl
 - The large number of features also reduces interpretability, making it more difficult for you as a scientist to understand which predictors truly drive the model’s behaviour.
 
 
-This is where techniques like **linear model selection** becomes essential, offering techniques to refine our models and extract meaningful insights from high-dimensional data.
+This is where techniques like **linear model selection** become essential, offering techniques to refine our models and extract meaningful insights from high-dimensional data.
 
 
 ## Today's data: Hitters
@@ -45,7 +37,7 @@ For computational reasons, we will not include all predictors but only a smaller
 # Keep a total of 10 variables - the target ´Salary´ and 9  features.
 hitters_subset = hitters[["Salary", "CHits", "CAtBat", "CRuns", "CWalks", "Assists", "Hits", "HmRun", "Years", "Errors"]].copy()
 
-# Remove rows with missing vlaues
+# Remove rows with missing values
 hitters_subset.dropna(inplace=True)
 
 hitters_subset.head()
@@ -61,8 +53,8 @@ sns.heatmap(hitters_subset.corr(), annot=True, cmap="coolwarm", fmt=".2f");
 
 The heatmap reveals strong correlations between several predictors:
 
-- `CHits` and `CAtBat` show a correlation of 1,
-- `CHits` and `CRuns` have a very strong correlation of 0.98,
+- `CHits` and `CAtBat` correlate at 0.995 (displayed as 1.00 after rounding)
+- `CHits` and `CRuns` correlate at 0.985
 
 We thus remove two of the correlated features:
 
@@ -74,8 +66,7 @@ hitters_subset = hitters_subset.drop(columns=features_drop)
 
 ## Handling big data in linear models
 
-```{admonition} Handling big data
-:class: hint
+```{hint} Handling big data
 
 To handle large datasets efficiently in linear modeling, three methods will be introduced in this course:
 
@@ -87,16 +78,16 @@ Today, we will focus on subset selection.
 ```
 
 ## Subset Selection
-In subset selection we identify a subset of *p* predictos that are truly related to the outcome. The model get fitted using least squares on the reduces set of variables.
+In subset selection we identify a subset of the $p$ predictors that are truly related to the outcome. The model is then fitted using least squares on the reduced set of variables.
 
-How do we determine which variables are relevant?! 
+How do we determine which variables are relevant?
 
 ###  Best Subset Selection
 
 We will start with performing Best Subset Selection (also called exhaustive search) as implemented in the `mlxtend` package. It has great documentation, e.g. for the [exhaustive search](https://rasbt.github.io/mlxtend/user_guide/feature_selection/ExhaustiveFeatureSelector/). In short, this approach is a brute-force evaluation of feature subsets. A specific performance metric (e.g. MSE, R², or accuracy) is optimized given an arbitrary regressor or classifier. For example, if we have 4 features, the algorithm will evaluate all 15 possible combinations of features.
 
 ```{code-cell} ipython3
-:tags: ["remove-input"]
+:tags: [remove-input]
 from jupyterquiz import display_quiz
 display_quiz("quiz/BestSubsetSelection.json", shuffle_answers=True)
 ```
@@ -154,6 +145,43 @@ df = pd.DataFrame.from_dict(efs.get_metric_dict()).T
 df.sort_values('avg_score', inplace=True, ascending=False)
 df
 ```
+
+Because the exhaustive search evaluated *every* subset, we can also draw the picture that motivates the whole chapter: how good is the best model of each size?
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+results = pd.DataFrame.from_dict(efs.get_metric_dict()).T
+results["n_features"] = results["feature_idx"].apply(len)
+results["avg_score"] = results["avg_score"].astype(float)
+
+best_per_size = results.groupby("n_features")["avg_score"].max()
+sizes = best_per_size.index.to_numpy()
+
+fig, ax = plt.subplots(figsize=(7, 4.5))
+ax.scatter(results["n_features"], results["avg_score"], s=14, alpha=0.25,
+           color="grey", label="every evaluated subset")
+ax.plot(sizes, best_per_size.values, "o-", color="#4c72b0", lw=2,
+        label="best subset of that size")
+
+best_size = int(best_per_size.idxmax())
+ax.axvline(best_size, color="crimson", ls="--", alpha=0.7)
+ax.annotate(f"best overall: {best_size} features",
+            xy=(best_size, best_per_size.max()),
+            xytext=(best_size + 0.3, best_per_size.max() - 0.06), color="crimson")
+
+ax.set(xlabel="Number of features in the model", ylabel="Cross-validated R²",
+       title="Best subset selection on the Hitters data", xticks=sizes)
+ax.legend()
+plt.tight_layout()
+
+print(f"Number of subsets evaluated: {len(results)}  (= 2^{X_train.shape[1]} - 1)")
+```
+
+Two things are worth noticing. First, the *training-style* intuition that "more features can only help" is simply false once we score with cross-validation: the curve rises, peaks, and then declines again. Second, the curve is almost flat over a wide range, which is exactly why the choice between best-subset and stepwise selection often does not matter much in practice.
 
 ### Forward Stepwise Selection
 
@@ -225,14 +253,14 @@ display_quiz('quiz/SubsetSelection.json')
 
 #### What next?
 
-Once we have identified the features that are relevant for predicting the outcome, let`s evaluate the model performance and estimate true test error with the thee predictors identified by Best Subset Selection and Forward Stepwise Seletion.
+All three procedures converged on the same three predictors here, so let's evaluate the model performance and estimate the true test error using that subset.
 
 ```{code-cell} ipython3
 import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
 
-selected_features = list(sfs_backward.k_feature_names_)
+selected_features = list(sfs_forward.k_feature_names_)
 
 # Subset the data
 X_train_subset = X_train[selected_features]
@@ -242,7 +270,7 @@ X_test_subset = X_test[selected_features]
 model = LinearRegression()
 model.fit(X_train_subset, y_train)
 
-# Get predictions anf performance
+# Get predictions and performance
 y_pred = model.predict(X_test_subset)
 
 mse_test = mean_squared_error(y_test, y_pred)
@@ -262,4 +290,4 @@ So in sum:
 
 ### Regularization and Dimensionality Reduction
 
-As mentioned before, regularization and dimensionality reduction are two other measures of dealing with large numbers of predictors. Regularization techniques will be introduced in the [next session](2_Regularization), and dimensionality reduction will be introduced in the [Principal Component Analysis](3_PCA_PCR) session.
+As mentioned before, regularization and dimensionality reduction are two other measures of dealing with large numbers of predictors. Regularization techniques will be introduced in the [next session](2_Regularization.md), and dimensionality reduction will be introduced in the [](3_PCA_PCR.md) session.

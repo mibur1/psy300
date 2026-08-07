@@ -1,18 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: Gradient boosting
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-chart-line"></i> From AdaBoost to Gradient Boosting
+# 📈 From AdaBoost to Gradient Boosting
 
 As we explored in the previous session, boosting refers to a class of ensemble methods that build predictive models sequentially, where each new model focuses on the errors made by previous ones. Historically, boosting was first introduced for classification in the form of AdaBoost. The same core idea can be extended to regression and leads naturally to gradient boosting, which is the main focus of this session.
 
@@ -143,9 +135,9 @@ Each new tree explains structure that previous trees failed to capture.
 
 After $M$ iterations, the model can be written as
 
-$$\hat{F}_M(x) = \sum_{m=1}^M \eta \, T_m(x)$$
+$$\hat{F}_M(x) = F_0 + \sum_{m=1}^M \eta \, T_m(x)$$
 
-where $\eta$ denotes the learning rate.
+where $F_0$ is the constant starting model (the mean of $y$) and $\eta$ denotes the learning rate.
 
 Gradient boosting offers several advantages. It:
 
@@ -186,8 +178,7 @@ ax.set(title="Gradient boosting regression", xlabel="x", ylabel="y");
 
 ---
 
-```{admonition} Summary
-:class: tip
+```{tip} Summary
 
 - AdaBoost introduces sequential error correction via observation weighting
 - This idea can be extended to regression but has limitations

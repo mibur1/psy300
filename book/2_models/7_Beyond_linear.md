@@ -1,18 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: Flexible regression
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-wave-square"></i> Polynomial and Flexible Regression
+# 〰️ Polynomial and Flexible Regression
 
 Let us have a quick recap of the first session of the semester, where regression models were introduced. In linear regression, we assume that the relationship between a predictor $x$ and a response $y$ is a straight line:
 
@@ -80,9 +72,7 @@ Polynomial regression extends the linear model by including powers of $x$ as add
   y \approx \beta_0 + \beta_1 x + \beta_2 x^2 + \dots + \beta_d x^d.
   $$
 
-```{admonition} Note
-:class: note 
-
+```{note}
 Polynomial regression models are still **linear models in the parameters** $(\beta_0, \dots, \beta_d)$ – we just feed them transformed inputs $(x, x^2, \dots, x^d)$.
 ```
 
@@ -340,9 +330,115 @@ ax.legend();
 Observe:
 
 * `frac = 0.2` follows the data more closely (more wiggles).
-* `frac > 0.5` give a more general trend.
+* `frac > 0.5` gives a more general trend.
 
 Local regression methods are very useful for **exploratory analysis**: they give a flexible, data-driven summary of the trend without a strong global parametric assumption.
+
+---
+
+## Interactive: how much flexibility is too much?
+
+All four methods have exactly one knob that controls flexibility — the polynomial degree, the number of cut points, the spline degrees of freedom, and the LOWESS span. Below you can turn that knob for each method and watch the fit respond. The reported errors come from a 70/30 train/test split, so you can also see *where* the extra flexibility stops paying off.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+from patsy import dmatrix
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+from statsmodels.nonparametric.smoothers_lowess import lowess
+import statsmodels.api as sm
+
+tpl = pio.templates["plotly_white"]
+tpl.layout.paper_bgcolor = "rgba(0,0,0,0)"
+tpl.layout.plot_bgcolor = "rgba(128,128,128,0.08)"
+tpl.layout.font.color = "#888888"
+pio.templates["psy300"] = tpl
+pio.templates.default = "psy300"
+
+x_all = data["x"].to_numpy()
+y_all = data["y"].to_numpy()
+x_tr, x_te, y_tr, y_te = train_test_split(x_all, y_all, test_size=0.3, random_state=0)
+grid = np.linspace(x_all.min(), x_all.max(), 300)
+
+
+def fit_predict(method, setting):
+    """Return (grid predictions, train MSE, test MSE) for one method/setting."""
+    if method == "poly":
+        c = np.polyfit(x_tr, y_tr, setting)
+        return np.polyval(c, grid), np.polyval(c, x_tr), np.polyval(c, x_te)
+
+    if method in ("step", "spline"):
+        degree = 0 if method == "step" else 3
+        formula = f"bs(v, df={setting}, degree={degree}, include_intercept=True)"
+        basis_tr = dmatrix(formula, {"v": x_tr}, return_type="dataframe")
+        model = sm.OLS(y_tr, basis_tr).fit()
+        pred = lambda v: model.predict(
+            dmatrix(basis_tr.design_info, {"v": v}, return_type="dataframe"))
+        return pred(grid), pred(x_tr), pred(x_te)
+
+    # LOWESS has no parametric form, so we interpolate its fitted curve
+    sm_fit = lowess(y_tr, x_tr, frac=setting, return_sorted=True)
+    pred = lambda v: np.interp(v, sm_fit[:, 0], sm_fit[:, 1])
+    return pred(grid), pred(x_tr), pred(x_te)
+
+
+configs = [
+    ("poly",   "Polynomial degree",  "poly", [1, 2, 3, 5, 8, 12, 18]),
+    ("step",   "Step function (df)", "step", [2, 3, 4, 6, 8, 12, 20]),
+    ("spline", "Cubic spline (df)",  "spl",  [4, 5, 6, 8, 10, 15, 25]),
+    ("lowess", "LOWESS span (frac)", "low",  [0.1, 0.2, 0.3, 0.5, 0.7, 0.9]),
+]
+
+traces, steps = [], []
+for method, label, tag, settings in configs:
+    for s in settings:
+        y_grid, y_hat_tr, y_hat_te = fit_predict(method, s)
+        traces.append(go.Scatter(x=grid, y=y_grid, mode="lines", visible=False,
+                                 line=dict(width=3, color="#c44e52"),
+                                 name=f"{label} = {s}"))
+        steps.append((label, s, f"{tag} {s:g}",
+                      mean_squared_error(y_tr, y_hat_tr),
+                      mean_squared_error(y_te, y_hat_te)))
+
+scatter = go.Scatter(x=x_all, y=y_all, mode="markers", name="Data",
+                     marker=dict(size=6, color="lightgrey",
+                                 line=dict(color="gray", width=1)))
+traces[0].visible = True
+
+
+def caption(i):
+    label, s, _, mtr, mte = steps[i]
+    return f"{label} = {s:g}   |   train MSE = {mtr:.3f}   |   test MSE = {mte:.3f}"
+
+
+slider_steps = []
+for i in range(len(traces)):
+    vis = [True] + [False] * len(traces)
+    vis[i + 1] = True
+    slider_steps.append(dict(
+        method="update", label=steps[i][2],
+        args=[{"visible": vis},
+              {"annotations": [dict(x=0.5, y=1.12, xref="paper", yref="paper",
+                                    text=caption(i), showarrow=False,
+                                    font=dict(size=13), xanchor="center")]}]))
+
+fig = go.Figure(data=[scatter] + traces)
+fig.update_layout(
+    sliders=[dict(active=0, currentvalue={"prefix": "Flexibility setting: "},
+                  font=dict(size=10), pad={"t": 40}, steps=slider_steps)],
+    annotations=[dict(x=0.5, y=1.12, xref="paper", yref="paper", text=caption(0),
+                      showarrow=False, font=dict(size=13), xanchor="center")],
+    xaxis_title="x", yaxis_title="y", showlegend=False,
+    margin=dict(l=10, r=10, t=80, b=20), height=500,
+)
+fig
+```
+
+The slider walks through all four method families in turn (polynomial, then steps, then splines, then LOWESS). Watch the two error numbers as you drag: the train MSE decreases monotonically for every method, while the test MSE bottoms out and then climbs. That gap is the bias-variance tradeoff of [](../1_basics/2_bias_variance.md), now visible for four different notions of "flexibility".
 
 ---
 
@@ -363,7 +459,7 @@ In practice, these methods are often combined with regularisation and cross-vali
 ---
 
 ```{code-cell} ipython3
-:tags: ["remove-input"]
+:tags: [remove-input]
 from jupyterquiz import display_quiz
 display_quiz("quiz/BeyondLinear.json", shuffle_answers=True)
 display_quiz("quiz/BeyondLinear2.json", shuffle_answers=True)

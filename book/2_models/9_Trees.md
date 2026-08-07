@@ -1,28 +1,20 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: Decision trees
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-tree"></i> Decision Trees
+# 🌳 Decision Trees
 
 Decision trees are a class of **non-parametric supervised learning algorithms** that can be used for both regression and classification. They work by recursively partitioning the predictor space and fitting a simple model (a constant) within each resulting region.
 
-Decision trees are unseful because they are:
+Decision trees are useful because they are:
 
 * intuitive and easy to visualise,
 * able to model non-linear relationships and interactions,
 * applicable to both regression and classification tasks.
 
-Tree-based methods segment the feature space into a set of non-overlapping regions (often called *boxes*). Each region corresponds to a leaf of the tree, and within a leaf the model predicts a single constant value. In regression, the prediciton is the mean; in classification, the prediction is the majority class (or class probabilities).
+Tree-based methods segment the feature space into a set of non-overlapping regions (often called *boxes*). Each region corresponds to a leaf of the tree, and within a leaf the model predicts a single constant value. In regression, the prediction is the mean; in classification, the prediction is the majority class (or class probabilities).
 
 The regions are (high-dimensional) axis-aligned rectangles. This follows directly from recursive binary splitting, which applies threshold-based splits on single features.
 
@@ -32,7 +24,7 @@ The regions are (high-dimensional) axis-aligned rectangles. This follows directl
 
 The general usage of regression trees is identical to previous regression models (instantiate -> fit -> predict):
 
-```{code-block} python
+```python
 from sklearn.tree import DecisionTreeRegressor
 
 model = DecisionTreeRegressor()
@@ -43,7 +35,7 @@ model.predict(X_test)
 A regression tree aims to:
 
 1. Divide the predictor space into regions $R_1, \dots, R_J$
-2. Predict the mean value $\hat{y}_{R_j}$ for all trining observations in a region $R_j$
+2. Predict the mean value $\hat{y}_{R_j}$ for all training observations in a region $R_j$
 
 As you learned in the lecture, there are a few additional parameters which we can choose, such as *splitting criteria* (where to split) or *stopping criteria* (when to stop splitting). You can look these up in the [documentation](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html). 
 
@@ -93,7 +85,7 @@ ax.set(xlabel="data", ylabel="target", title="Decision Tree Regression")
 plt.legend();
 ```
 
-You can see that the model with `max_depth=2` model is underfitting, while the model with `max_depth=6` is clearly overfitting. We can also can evaluate the models with typical performance metrics such as $R^2$:
+You can see that the model with `max_depth=2` is underfitting, while the model with `max_depth=6` is clearly overfitting. We can also evaluate the models with typical performance metrics such as $R^2$:
 
 ```{code-cell} ipython3
 from sklearn.metrics import r2_score
@@ -104,6 +96,67 @@ r2_6 = r2_score(y_test, model2.predict(X_test))
 print(f"R² (max_depth=2): {r2_2:.3f}")
 print(f"R² (max_depth=6): {r2_6:.3f}")
 ```
+
+### Interactive: where does the tree stop helping?
+
+Two depths make the point, but the full picture is more convincing. **Drag the slider** to grow the tree one level at a time and watch the step function chase the data:
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+from sklearn.metrics import r2_score
+
+tpl = pio.templates["plotly_white"]
+tpl.layout.paper_bgcolor = "rgba(0,0,0,0)"
+tpl.layout.plot_bgcolor = "rgba(128,128,128,0.08)"
+tpl.layout.font.color = "#888888"
+pio.templates["psy300"] = tpl
+pio.templates.default = "psy300"
+
+depths = list(range(1, 13))
+grid = np.arange(0.0, 5.0, 0.01)[:, np.newaxis]
+
+traces, captions = [], []
+for d in depths:
+    tree = DecisionTreeRegressor(max_depth=d, random_state=0).fit(X_train, y_train)
+    traces.append(go.Scatter(x=grid.ravel(), y=tree.predict(grid), mode="lines",
+                             visible=False, line=dict(width=3, color="#55a868")))
+    captions.append(
+        f"max_depth = {d}   |   leaves = {tree.get_n_leaves()}   |   "
+        f"train R² = {r2_score(y_train, tree.predict(X_train)):.3f}   |   "
+        f"test R² = {r2_score(y_test, tree.predict(X_test)):.3f}"
+    )
+traces[0].visible = True
+
+points = go.Scatter(x=X.ravel(), y=y, mode="markers", name="data",
+                    marker=dict(size=8, color="darkorange", opacity=0.5))
+
+slider_steps = []
+for i, d in enumerate(depths):
+    vis = [True] + [False] * len(traces)
+    vis[i + 1] = True
+    slider_steps.append(dict(method="update", label=str(d),
+                             args=[{"visible": vis},
+                                   {"annotations": [dict(x=0.5, y=1.12, xref="paper", yref="paper",
+                                                         text=captions[i], showarrow=False,
+                                                         font=dict(size=13), xanchor="center")]}]))
+
+fig = go.Figure(data=[points] + traces)
+fig.update_layout(
+    sliders=[dict(active=0, currentvalue={"prefix": "Tree depth: "}, pad={"t": 40},
+                  steps=slider_steps)],
+    annotations=[dict(x=0.5, y=1.12, xref="paper", yref="paper", text=captions[0],
+                      showarrow=False, font=dict(size=13), xanchor="center")],
+    xaxis_title="data", yaxis_title="target", showlegend=False,
+    margin=dict(l=10, r=10, t=80, b=20), height=480,
+)
+fig
+```
+
+The train R² keeps climbing towards 1 as the tree memorises individual points, while the test R² peaks early and then falls away. Note also how the number of leaves roughly doubles per level — a tree's capacity grows *exponentially* in its depth, which is precisely why unrestricted trees overfit so readily.
 
 ### The optimisation target
 
@@ -129,19 +182,19 @@ that minimise the RSS of the two resulting child nodes.
 
 Why can’t every possible kind of partition come from recursive binary splitting?
 
-<details>
-<summary><strong>Show solution</strong></summary>
+:::{dropdown} Show solution
 Recursive binary splitting produces axis-aligned rectangular regions. Any partition that requires non-rectangular shapes or oblique boundaries cannot be generated by this procedure.
+:::
 
 ---
 
 ## Classification Trees
 
-Classification trees follow the same recursive splitting logic, but use different criteria to evaluate the splits, such as the classification error or purity measures. An popular purity measure is the Gini index, which is calculated as:
+Classification trees follow the same recursive splitting logic, but use different criteria to evaluate the splits, such as the classification error or purity measures. A popular purity measure is the Gini index, which is calculated as:
 
 $$G = \sum_{k=1}^{K} \hat{p}_{mk}(1-\hat{p}_{mk})$$
 
-A small $G$ means high purity (mostly one class), while a large $G$ means low purity, indicating the a split does not split the classes well. Here is an example with the Iris dataset, which contains measurements for three different types of iris flowers:
+A small $G$ means high purity (mostly one class), while a large $G$ means low purity, indicating that a split does not separate the classes well. Here is an example with the Iris dataset, which contains measurements for three different types of iris flowers:
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
@@ -187,10 +240,7 @@ The tree plot of the fitted model contains the following information:
 Another nice illustration is plotting the decision boundaries. As this works best with 2 features, we here showcase it for pairwise feature combinations:
 
 ```{code-cell} ipython3
----
-tags:
-  - hide-input
----
+:tags: [hide-input]
 import numpy as np
 from sklearn.inspection import DecisionBoundaryDisplay
 
@@ -282,7 +332,7 @@ print("Test set accuracy:", grid.score(X_test, y_test))
 
 ## Ensemble Methods
 
-Single trees are prone to overfitting and generally are not competetive when compared to more sophisticated models such als support vector machines. Ensemble methods try to solve these issues by combining many trees to reduce variance (bagging, random forest) or bias (boosting).
+Single trees are prone to overfitting and generally are not competitive when compared to more sophisticated models such as support vector machines. Ensemble methods try to solve these issues by combining many trees to reduce variance (bagging, random forest) or bias (boosting).
 
 ### Bagging (Bootstrap Aggregation)
 
@@ -312,7 +362,7 @@ On average, about two-thirds of observations appear in any given bootstrap sampl
 
 For each training observation, predictions are obtained only from trees for which that observation was OOB and then aggregated (majority vote for classification).
 
-The OOB score reports the model’s performance on these OOB predictions. For classification, the default corresponds to the prediciton accuracy, and with enough trees, the OOB score provides a strong internal estimate of test-set performance.
+The OOB score reports the model’s performance on these OOB predictions. For classification, the default corresponds to the prediction accuracy, and with enough trees, the OOB score provides a strong internal estimate of test-set performance.
 
 
 ### Random Forests
@@ -358,9 +408,9 @@ The core idea is to combine many weak learners (typically shallow trees) into a 
 
 Each individual tree is usually very small (often depth 1-3) and only slightly better than random guessing. The strength of boosting comes from accumulating many such small improvements. If we denote the $m$-th tree by $T_m(x)$ and its fitted weight by $\gamma_m$, the boosted prediction after $M$ trees is typically
 
-$$\hat{F}_M(x) = \sum_{m=1}^{M} \eta \, \gamma_m \, T_m(x)$$
+$$\hat{F}_M(x) = F_0 + \sum_{m=1}^{M} \eta \, \gamma_m \, T_m(x)$$
 
-where the learning rate $\eta$ shrinks each tree’s contribution. Because the trees are added sequentially, later trees are trained on the residuals (or gradient directions) left unexplained by the earlier ones.
+where $F_0$ is the constant initial prediction and the learning rate $\eta$ shrinks each tree’s contribution. Because the trees are added sequentially, later trees are trained on the residuals (or gradient directions) left unexplained by the earlier ones.
 
 Boosted trees involve several interacting hyperparameters:
 
@@ -398,8 +448,7 @@ accuracy_score(y_test, boost.predict(X_test))
 
 ## Summary
 
-```{admonition} Tree-based methods
-:class: note 
+```{note} Tree-based methods
 
 | Method            | Description                                      | Pros (non exhaustive)               | Cons (non exhaustive)                                 |
 |-------------------|--------------------------------------------------|-------------------------------------|-------------------------------------------------------|

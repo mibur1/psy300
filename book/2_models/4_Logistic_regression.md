@@ -1,22 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: Logistic regression
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
-myst:
-  substitutions:
-    lambda: 1
+  display_name: Python 3
 ---
-
-
-# <i class="fa-solid fa-bars-progress"></i> Logistic Regression
+# 📊 Logistic Regression
 
 Before applying logistic regression to model our data, we will attempt to do so through simple linear regression. While linear regression is not suitable for dichotomous outcomes, 
 visualizing it can help illustrate why logistic regression is a better fit for our research question.
@@ -104,11 +92,11 @@ plt.show()
 
 ### From Logits to Probabilities
 
-We can simply transform the logits back into probabilities (more specifically the conditional probability of an observation y belongig to class 1 given predictor(s) X):
+We can simply transform the logits back into probabilities (more specifically the conditional probability of an observation $y$ belonging to class 1 given predictor(s) $X$):
 
 $$P(Y=1 \mid X) = \frac{1}{1 + e^{-(b_0 + b_1 X)}}$$
 
-To better understand the model's behavior, let’s plot its outputs. A simple way to do this is by ceating an evenly spaced array of values for our range, 
+To better understand the model's behavior, let’s plot its outputs. A simple way to do this is by creating an evenly spaced array of values for our range, 
 and then use `model.predict_proba()` to predict the outcome for each value. This will generate the regression line:
 
 ```{code-cell} ipython3
@@ -156,8 +144,8 @@ print("Model predictions:", predictions)
 print("\nAccuracy:", accuracy) 
 ```
 
-An accuracy of 77% indicates the that the model correctly predicts the outcome for about 77% of the children in our data. This suggests that the model peforms reasonably well, 
-altough it still misclassifies some cases. For a more detailed investigation, a confusion matrix is a useful way to visualize the prediction accuracy:
+An accuracy of 77% indicates the that the model correctly predicts the outcome for about 77% of the children in our data. This suggests that the model performs reasonably well,
+although it still misclassifies some cases. For a more detailed investigation, a confusion matrix is a useful way to visualize the prediction accuracy:
 
 ```{code-cell} ipython3
 from sklearn.metrics import confusion_matrix, classification_report
@@ -184,8 +172,8 @@ The output can be interpreted as follows:
 
 $$\text{Precision} = \frac{\text{True Positives (TP)}}{\text{True Positives (TP)} + \text{False Positives (FP)}}$$
 
-- *Class 0: When the model predicts that a sample does not understand the display rules (Class 0), 73% of the time it is correct.*
-- *Class 1: When the model predicts that a sample does understand the display rules (Class 1), 81% of the time it is correct. * 
+- *Class 0: when the model predicts that a sample does not understand the display rules (Class 0), 73% of the time it is correct.*
+- *Class 1: when the model predicts that a sample does understand the display rules (Class 1), 81% of the time it is correct.*
 
 
 **Recall**: Proportion of actual samples of a class that the model correctly identifies.
@@ -200,14 +188,14 @@ $$\text{Recall} = \frac{\text{True Positives (TP)}}{\text{True Positives (TP)} +
 
 $$F_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$
 
-- *For class 0, it is 0.75 and for class 1, it is 0.79. This suggests the model is sligthly more effective at correctly predicting class 1.*
+- *For class 0 it is 0.75, and for class 1 it is 0.79. This suggests the model is slightly more effective at correctly predicting class 1.*
 
-**Support**: actual occurence of each class in the dataset
+**Support**: the actual number of observations of each class in the dataset
 
 **Accuracy**: The overall proportion of correctly predicted observations.
 
 $$\text{Accuracy} = \frac{TP + TN}{\text{Total number of observations}}$$
-- *model correctly predicts the outcome 77% of the time, which is fairly good*
+- *The model correctly predicts the outcome 77% of the time, which is fairly good.*
 
 
 ## Multiple Logistic Regression

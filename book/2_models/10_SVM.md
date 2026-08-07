@@ -1,21 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: SVMs
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
-myst:
-  substitutions:
-    ref_test: 1
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-gear"></i> Support Vector Machines
+# ⚙️ Support Vector Machines
 
 Support Vector Machines (SVMs) are supervised max-margin learning models used for classification and regression. In classification, they maximise the separation between classes, while in regression they learn a function that stays within an $\epsilon$-insensitive margin around the data.
 
@@ -47,19 +36,16 @@ ax.legend(handles=legend_elements, loc="upper left", handlelength=1);
 ## Quiz
 
 ```{code-cell} ipython3
-:tags: ["remove-input"]
+:tags: [remove-input]
 from jupyterquiz import display_quiz
 display_quiz("quiz/SVC.json", shuffle_answers=True)
 ```
 
-<details>
-<summary><strong>Show visualisation</strong></summary>
-There are infinite ways to separate the two classes because you can find an infintie amount of lines which perfectly separate them. If we visualise this and add a new data point for classification a potential issue becomes apparent. For some models, this data point would fall into Class 0 and for others into Class 1:
+:::::{dropdown} Show visualisation
+There are infinitely many ways to separate the two classes, because you can find an unlimited number of lines that separate them perfectly. If we visualise this and add a new data point for classification, a potential issue becomes apparent. For some models this data point would fall into Class 0, and for others into Class 1:
 
 ```{code-cell} ipython3
 :tags: [remove-input]
-from collections import OrderedDict
-
 fig, ax = plt.subplots()
 sns.scatterplot(x=X[:, 0], y=X[:, 1], hue=y, ax=ax, s=60)
 
@@ -78,7 +64,7 @@ ax.set_xlim(-4, 3)
 ax.set_ylim(-1, 5)
 ax.set(xlabel="Feature 1", ylabel="Feature 2")
 
-# Custom egend
+# Custom legend
 legend_elements = [
     Line2D([0], [0], marker='o', linestyle='None', markersize=8, label='Class 0', markerfacecolor="#0173B2", markeredgecolor='None'),
     Line2D([0], [0], marker='o', linestyle='None', markersize=8, label='Class 1', markerfacecolor="#DE8F05", markeredgecolor='None'),
@@ -86,11 +72,11 @@ legend_elements = [
     Line2D([0], [0], marker='x', color='red', markersize=10, markeredgewidth=3, label='New data', markerfacecolor='None', linestyle='None')]
 ax.legend(handles=legend_elements, loc="upper left", handlelength=1);
 ```
-
+:::::
 
 ## Support Vector Classifiers (SVC)
 
-So evidently, we can't just be satisfied with having an infinite amount of possible solutions we need to come up with a more justifiable one. If you remember, we already did so for linear regression: there, the least squares method chose the line that minimised the total squared distance between predictions and true values.
+So evidently we cannot be satisfied with having infinitely many possible solutions — we need to come up with a more justifiable one. If you remember, we already did so for linear regression: there, the least squares method chose the line that minimised the total squared distance between predictions and true values.
 
 Support Vector Classifiers have a slightly different method. As [Robert Tibshirani](https://en.wikipedia.org/wiki/Robert_Tibshirani) put it, they are
 
@@ -125,7 +111,7 @@ If the data is not perfectly separable (either because the classes overlap, or t
 
 ### Example 1: Linear Classification
 
-Fitting a SVC is straigthforward:
+Fitting an SVC is straightforward:
 
 ```{code-cell} ipython3
 from sklearn.svm import SVC
@@ -137,10 +123,7 @@ clf.fit(X, y);
 With a little helper function we can visualize the decision function and supports:
 
 ```{code-cell} ipython3
----
-tags:
-  - hide-input
----
+:tags: [hide-input]
 def plot_svc_decision_function(model, ax=None):
     """Plot the decision boundary and margins for a trained 2D SVC model."""
     # Set up grid
@@ -208,7 +191,7 @@ ax.scatter(X[:, 0], X[:, 1], r, c=colors, s=50, alpha=0.5, edgecolors=colors)
 ax.view_init(elev=20, azim=30)
 ax.set(xlabel='x', ylabel='y', zlabel='r');
 
-# Custom egend
+# Custom legend
 legend_elements = [
     Line2D([0], [0], marker='o', linestyle='None', markersize=8, label='Class 0', markerfacecolor="#0173B2", markeredgecolor='None'),
     Line2D([0], [0], marker='o', linestyle='None', markersize=8, label='Class 1', markerfacecolor="#DE8F05", markeredgecolor='None')]
@@ -298,7 +281,7 @@ legend_elements = [
 ax.legend(handles=legend_elements, loc="upper left", handlelength=1);
 plt.show()
 
-# Multiclass prediciton
+# Multiclass prediction
 clf = SVC(kernel='rbf', decision_function_shape='ovo')
 clf.fit(X_train, y_train)
 
@@ -314,8 +297,7 @@ SVCs have a few hyperparameters. Please have a look at the [documentation](https
 * `kernel`: `'linear'`, `'poly'`, `'rbf'`, `'sigmoid'`, or custom.
 * `gamma`: Kernel coefficient (for RBF, polynomial, and sigmoid kernels)
 
-```{admonition} Note
-:class: warning 
+```{warning} `C` is inverted compared to the lecture
 
 In `sklearn` (and usually also MATLAB and R) `C` behaves inversely to what you were shown in the lecture. Small values of C will result in a wider margin, at the cost of misclassifications (high bias, low variance). Large values of C will give you a smaller margin and fit the training data more tightly (low bias, higher variance).
 ```
@@ -324,10 +306,7 @@ As always, hyperparameters should be tuned using [cross-validation](../1_basics/
 
 
 ```{code-cell} ipython3
----
-tags:
-  - hide-input
----
+:tags: [hide-input]
 import pandas as pd
 from sklearn.model_selection import GridSearchCV
 
@@ -372,8 +351,99 @@ ax.set(xticks=xticks, yticks=yticks, yticklabels=yticklabels, title="Mean CV Acc
 ax.set_xticklabels(xticklabels, rotation=45);
 ```
 
-```{admonition} Summary
-:class: note 
+### Interactive: what do C and gamma actually do?
+
+The heatmap tells you *which* combination scored best, but not *why*. Below you can set both hyperparameters by hand and see the decision boundary they produce. Move `C` and `gamma` around and try to reproduce the two classic failure modes: a boundary so smooth it ignores the structure, and a boundary so wiggly it wraps around individual points.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+
+tpl = pio.templates["plotly_white"]
+tpl.layout.paper_bgcolor = "rgba(0,0,0,0)"
+tpl.layout.plot_bgcolor = "rgba(128,128,128,0.08)"
+tpl.layout.font.color = "#888888"
+pio.templates["psy300"] = tpl
+pio.templates.default = "psy300"
+
+C_grid = [0.1, 1, 10, 100]
+gamma_grid = [0.1, 1, 10, 100]
+
+# Self-contained data so this cell does not depend on earlier chapter state
+Xi, yi = make_circles(200, factor=.3, noise=.18, random_state=0)
+Xi_train, Xi_test, yi_train, yi_test = train_test_split(
+    Xi, yi, stratify=yi, random_state=0)
+
+xx, yy = np.meshgrid(np.linspace(Xi[:, 0].min() - 0.4, Xi[:, 0].max() + 0.4, 160),
+                     np.linspace(Xi[:, 1].min() - 0.4, Xi[:, 1].max() + 0.4, 160))
+mesh = np.c_[xx.ravel(), yy.ravel()]
+
+surfaces, captions = [], []
+for C in C_grid:
+    for g in gamma_grid:
+        model = SVC(kernel="rbf", C=C, gamma=g).fit(Xi_train, yi_train)
+        Z = model.decision_function(mesh).reshape(xx.shape)
+        surfaces.append(go.Contour(
+            x=xx[0], y=yy[:, 0], z=Z, visible=False, showscale=False,
+            # Alpha is baked into the colorscale so the midpoint stays
+            # see-through in both the light and the dark version of the site
+            colorscale=[[0.0, "rgba(1,115,178,0.55)"],
+                        [0.5, "rgba(128,128,128,0.04)"],
+                        [1.0, "rgba(222,143,5,0.55)"]],
+            contours=dict(start=-3, end=3, size=0.25),
+            line=dict(width=0),
+        ))
+        captions.append(
+            f"C = {C:g},  gamma = {g:g}   |   "
+            f"support vectors = {len(model.support_)}/{len(Xi_train)}   |   "
+            f"train acc = {model.score(Xi_train, yi_train):.2f}   |   "
+            f"test acc = {model.score(Xi_test, yi_test):.2f}"
+        )
+# Start on a sensible middle setting (C = 1, gamma = 1) rather than an extreme
+start = C_grid.index(1) * len(gamma_grid) + gamma_grid.index(1)
+surfaces[start].visible = True
+
+points = go.Scatter(
+    x=Xi[:, 0], y=Xi[:, 1], mode="markers", name="data", showlegend=False,
+    marker=dict(size=8, color=np.where(yi == 0, "#0173B2", "#DE8F05"),
+                line=dict(width=1, color="white")),
+)
+
+slider_steps = []
+for i, cap in enumerate(captions):
+    vis = [False] * len(surfaces) + [True]
+    vis[i] = True
+    C, g = C_grid[i // len(gamma_grid)], gamma_grid[i % len(gamma_grid)]
+    slider_steps.append(dict(
+        method="update", label=f"{C:g}/{g:g}",
+        args=[{"visible": vis},
+              {"annotations": [dict(x=0.5, y=1.12, xref="paper", yref="paper",
+                                    text=cap, showarrow=False,
+                                    font=dict(size=12), xanchor="center")]}]))
+
+fig = go.Figure(data=surfaces + [points])
+fig.update_layout(
+    sliders=[dict(active=start, pad={"t": 50}, steps=slider_steps,
+                  font=dict(size=10),
+                  currentvalue={"prefix": "C / gamma = "})],
+    annotations=[dict(x=0.5, y=1.12, xref="paper", yref="paper", text=captions[start],
+                      showarrow=False, font=dict(size=12), xanchor="center")],
+    xaxis_title="Feature 1", yaxis_title="Feature 2",
+    margin=dict(l=10, r=10, t=80, b=20), height=560,
+)
+fig
+```
+
+What to look for:
+
+- **Small `gamma`** makes each support vector influence a wide region, so the boundary is nearly straight. **Large `gamma`** shrinks that influence to a tiny neighbourhood, and the model starts drawing islands around individual training points — memorisation, not learning.
+- **Small `C`** tolerates margin violations and yields a wide, smooth margin. **Large `C`** insists on classifying every training point correctly, at the cost of a contorted boundary.
+- The **support vector count** is a useful diagnostic in its own right: a model that needs nearly every training point as a support vector has not compressed the data into anything general.
+
+```{note} Summary
 
 - Support Vector Classifiers are a robust and versatile tool for classification tasks
 - The key ideas are rooted in geometry - finding the optimal hyperplane that separates data with maximum margin

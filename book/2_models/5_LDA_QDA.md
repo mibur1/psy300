@@ -1,28 +1,16 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: LDA & QDA
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
-myst:
-  substitutions:
-    ref_test: 1
+  display_name: Python 3
 ---
-
-# <i class="fa-solid fa-divide"></i> LDA & QDA
+# ➗ LDA & QDA
 
 We have previously introduced logistic regression as a classification algorithm. It belongs to a class of models referred to as **discriminative models**. This means they try to establish a decision boundary (discriminator), which best separates the classes.
 
 In contrast, **generative models** such as Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA) (and also Naïve Bayes, which will be introduced in the next session) see the world with different eyes! They are focused on learning the *underlying distribution* of the data and its labels.
 
-```{admonition} Generative models
-:class: tip
+```{tip} Generative models
 
 - Learn the distribution of features for each class, not just how to separate them
 - Use this information to calculate the likelihood of new data belonging to each class
@@ -145,8 +133,7 @@ where:
 
 Here, the term $-\frac{1}{2} (X - \mu_k)^T \Sigma_k^{-1} (X - \mu_k)$ remains in quadratic form and depends on $k$, which leads to quadratic decision boundaries.
 
-```{admonition} Choosing Between LDA and QDA
-:class: tip
+```{tip} Choosing Between LDA and QDA
 
 **LDA**
 - Is ideal when you assume the classes share a similar spread in the feature space

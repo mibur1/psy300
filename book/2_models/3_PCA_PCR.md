@@ -1,22 +1,10 @@
 ---
-jupytext:
-  formats: md:myst
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.11.5
+short_title: PCA, PCR & PLS
 kernelspec:
-  display_name: Python 3
-  language: python
   name: python3
-myst:
-  substitutions:
-    lambda: 1
+  display_name: Python 3
 ---
-
-
-# <i class="fa-solid fa-magnifying-glass-chart"></i> PCA, PCR & PLS
+# 🔎 PCA, PCR & PLS
 
 ## Principal Component Analysis
 
@@ -87,7 +75,7 @@ print("\nExplained variance ratio:\n", pca.explained_variance_ratio_)
 
 Since PC1 explains over 92% of the variance, projecting onto it alone already captures most of the dataset’s structure.
 
-Finally, we can project the data wit the `.transform(X)` method. This does the following:
+Finally, we can project the data with the `.transform(X)` method. This does the following:
 
 1. Centers `X` by subtracting each feature’s mean.
 2. Computes dot-products with the selected eigenvectors.
@@ -120,19 +108,55 @@ legend = ax1.legend(handles, iris.target_names, loc='upper left', title='Species
 ax1.add_artist(legend);
 ```
 
+The 3D panel above is hard to read on a flat page, so here is the same projection as a figure you can **rotate and zoom** with the mouse. Spin it around and you will see that almost all of the separation lives along PC1:
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+import plotly.graph_objects as go
+import plotly.io as pio
+
+tpl = pio.templates["plotly_white"]
+tpl.layout.paper_bgcolor = "rgba(0,0,0,0)"
+tpl.layout.plot_bgcolor = "rgba(128,128,128,0.08)"
+tpl.layout.font.color = "#888888"
+pio.templates["psy300"] = tpl
+pio.templates.default = "psy300"
+
+colours = ["#4c72b0", "#dd8452", "#55a868"]
+evr = pca.explained_variance_ratio_
+
+fig = go.Figure()
+for k, name in enumerate(iris.target_names):
+    mask = y == k
+    fig.add_trace(go.Scatter3d(
+        x=X_pca[mask, 0], y=X_pca[mask, 1], z=X_pca[mask, 2],
+        mode="markers", name=name,
+        marker=dict(size=4, color=colours[k], opacity=0.8),
+    ))
+
+fig.update_layout(
+    scene=dict(
+        xaxis_title=f"PC1 ({evr[0]:.1%})",
+        yaxis_title=f"PC2 ({evr[1]:.1%})",
+        zaxis_title=f"PC3 ({evr[2]:.1%})",
+    ),
+    margin=dict(l=0, r=0, t=30, b=0), height=520,
+    title="Iris projected onto its first three principal components",
+)
+fig
+```
+
 ## Principal Component Regression
 
 Previously introduced regularized regression models such as Ridge and Lasso address issues with correlated features or high-dimensional predictors by shrinking the regression coefficients. Another way to handle these issues is to transform the predictor space itself before regression. This leads to Principal Component Regression (PCR).
 
 Principal Component Regression (PCR) first performs Principal Component Analysis (PCA) on the predictor matrix `X`. Then, it fits a linear regression model on the PCA-transformed data. This approach works well when directions of high variance in `X` are also predictive for `y`. However, since PCA is unsupervised, it may drop components that explain little variance but have high predictive power.
 
-Let's have another look at the simulated from above.
+Let's have another look at the simulated data from above.
 
 ```{code-cell} ipython3
----
-tags:
-  - hide-input
----
+:tags: [hide-input]
 
 import numpy as np
 import matplotlib.pyplot as plt
