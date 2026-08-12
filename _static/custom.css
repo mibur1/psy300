@@ -64,6 +64,18 @@ html.dark .Feedback {
   display: none !important;
 }
 
+/* --- Figures in dark mode ------------------------------------------
+   PNGs drawn with a transparent background disappear against the dark
+   theme. Put back the light canvas they were drawn on. Images that are
+   already opaque only gain the padding, since the backdrop sits behind
+   pixels they fill anyway. Scoped to <article> so the header logo keeps
+   its own dark variant.                                               */
+html.dark article img {
+  background-color: #ffffff;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
 /* --- Tables --------------------------------------------------------
    Several chapters use wide comparison tables. Let them scroll instead
    of forcing the whole page to scroll horizontally.                   */
