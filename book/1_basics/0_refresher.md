@@ -85,7 +85,7 @@ go.Figure(data=[scatter, regression], layout=layout)
 ```
 :::
 
-Let's take a closer look at the model. As introduced last semester, we can e.g. use the `statsmodels.formula.api` library to specify and fit regression models with a formula notation similar to R. We use the `ols()` class to fit the model specified as `y ~ x`, which translates to "y predicted by x":
+Let's take a closer look at regression models. We can e.g. use the `statsmodels.formula.api` library to specify and fit models with a formula notation similar to R. We use the `ols()` class to fit the model specified as `y ~ x`, which translates to "y predicted by x":
 
 ```{code-cell} ipython3
 import statsmodels.formula.api as smf
@@ -234,7 +234,7 @@ You can see that the R² now has a peak around a 3rd order polynomial regression
 
 [^overfit]: Overfitting refers to fitting patterns in the training data which do not generalize to the testing data.
 
-So how can we then find the best model that avoids overfitting? From your classes in basic (psychological) methods, you might be familiar with *Occam's razor*, which states that:
+So how can we then find the best model that avoids overfitting? You might be familiar with *Occam's razor*, which states that:
 
 > Entia non sunt multiplicanda praeter necessitatem.
 

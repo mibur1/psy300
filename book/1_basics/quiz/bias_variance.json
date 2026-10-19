@@ -1,22 +1,130 @@
-[{
-    "question": "High bias is associated with...?",
-    "type": "multiple_choice",
-    "answers": [
-        {
-            "answer": "Low training MSE and high test MSE",
-            "correct": false
-        },
-        {
-            "answer": "High training MSE and high test MSE",
-            "correct": true
-        },
-        {
-            "answer": "Low training MSE and low test MSE",
-            "correct": false
-        },
-        {
-            "answer": "High training MSE and low test MSE",
-            "correct": false
-        }
-    ]
-}]
+[
+    {
+        "question": "High bias is associated with...?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "High training MSE and high test MSE",
+                "correct": true,
+                "feedback": "Correct! A model that is too simple misses the pattern in the training data and in new data alike."
+            },
+            {
+                "answer": "Low training MSE and high test MSE",
+                "correct": false,
+                "feedback": "Not quite. This is the typical sign of high variance (overfitting)."
+            },
+            {
+                "answer": "Low training MSE and low test MSE",
+                "correct": false,
+                "feedback": "Not quite. This would be a model with low bias and low variance."
+            },
+            {
+                "answer": "High training MSE and low test MSE",
+                "correct": false,
+                "feedback": "Not quite. A model that fits the training data poorly will rarely do better on new data."
+            }
+        ]
+    },
+    {
+        "question": "High variance is associated with...?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Low training MSE and high test MSE",
+                "correct": true,
+                "feedback": "Correct! The model fits the noise in the training data, which does not carry over to new data."
+            },
+            {
+                "answer": "High training MSE and high test MSE",
+                "correct": false,
+                "feedback": "Not quite. This is the typical sign of high bias (underfitting)."
+            },
+            {
+                "answer": "Low training MSE and low test MSE",
+                "correct": false,
+                "feedback": "Not quite. This would be a model with low bias and low variance."
+            },
+            {
+                "answer": "High training MSE and low test MSE",
+                "correct": false,
+                "feedback": "Not quite. A model that fits the training data poorly will rarely do better on new data."
+            }
+        ]
+    },
+    {
+        "question": "Why can we not use the training MSE to choose the polynomial degree?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "It keeps decreasing with model flexibility, so the most flexible model would always win",
+                "correct": true,
+                "feedback": "Correct! A flexible model can also fit the noise, which lowers the training MSE but not the test MSE."
+            },
+            {
+                "answer": "It is always higher than the test MSE",
+                "correct": false,
+                "feedback": "Not quite. It is usually lower than the test MSE, because the model was fitted to exactly these data."
+            },
+            {
+                "answer": "It ignores the bias of the model",
+                "correct": false,
+                "feedback": "Not quite. A model with high bias also has a high training MSE. The problem is variance, which the training MSE does not reveal."
+            }
+        ]
+    },
+    {
+        "question": "In our simulation, the noise has a standard deviation of σ = 0.5. What is the lowest expected test MSE any model can reach?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "value",
+                "value": 0.25,
+                "correct": true,
+                "feedback": "Correct! The irreducible error is the noise variance σ² = 0.5² = 0.25."
+            },
+            {
+                "type": "value",
+                "value": 0.5,
+                "correct": false,
+                "feedback": "Not quite. 0.5 is the standard deviation, but the MSE is in squared units."
+            },
+            {
+                "type": "value",
+                "value": 0,
+                "correct": false,
+                "feedback": "Not quite. Even a perfect model cannot predict the random noise in new observations."
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. Even a perfect model is left with the irreducible error, the noise variance σ²."
+            }
+        ]
+    },
+    {
+        "question": "Suppose the true relationship were quadratic instead of cubic. Which polynomial degree would you expect to have the lowest test MSE?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "2",
+                "correct": true,
+                "feedback": "Correct! Degree 2 is the simplest model without bias. Every additional degree only adds variance."
+            },
+            {
+                "answer": "1",
+                "correct": false,
+                "feedback": "Not quite. A straight line cannot represent a quadratic curve, so it has high bias."
+            },
+            {
+                "answer": "3",
+                "correct": false,
+                "feedback": "Not quite. Degree 3 has no bias either, but it adds variance without any benefit."
+            },
+            {
+                "answer": "10",
+                "correct": false,
+                "feedback": "Not quite. Degree 10 has no bias, but a very high variance."
+            }
+        ]
+    }
+]

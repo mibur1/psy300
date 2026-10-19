@@ -7,11 +7,20 @@ kernelspec:
 
 # ⚖️ Bias-Variance Tradeoff
 
-Before we dive into the concept of bias, let's briefly recap some theoretical concepts you learned about in the lecture. When we talk about fitting machine learning models, we are referring to the process of estimating a function $f$ that best represents the relationship between an outcome and a set of labelled data (in supervised learning) or to uncover structural patterns in unlabelled data (in unsupervised learning). While the estimated function $\hat{f}$ conveys important information about the data from which it was derived (the training data), our primary interest is in using this function to make accurate predictions for future cases in new, unseen data sets.
+To begin with, let's briefly recap some theoretical concepts you learned about in the lecture. When we talk about fitting machine learning models, we are referring to the process of estimating a function $f$ that best represents the relationship between a set of predictors $X$ and an outcome $Y$ (in supervised learning) or to uncover structural patterns in unlabelled data (in unsupervised learning). While the estimated function $\hat{f}$ conveys important information about the data from which it was derived (the training data), our primary interest is in using this function to make accurate predictions for future cases in new, unseen data sets.
 
-The fundamental question in statistical learning is how well $\hat{f}$ will perform on these future data sets, which brings us to the concept of the *bias-variance tradeoff*. Bias occurs when a model is too simple to capture the underlying complexities of the data, leading to systematic inaccuracies in its predictions. Variance measures how much the model's predictions fluctuate when trained on different subsets of the data.
+The fundamental question in statistical learning is how well $\hat{f}$ will perform on these future data sets, which brings us to the concept of the *bias-variance tradeoff*. Bias occurs when a model is too simple to capture the underlying complexities of the data, leading to systematic inaccuracies in its predictions. Variance measures how much the model's predictions fluctuate when it is trained on different samples from the same population.
 
-```{note} Reminder: Types of Errors
+Before we continue, check what you remember about the different types of errors from the lecture:
+
+```{code-cell} ipython3
+:tags: [remove-input]
+import sys; sys.path.append("..")
+from quizpager import display_quiz_paged
+display_quiz_paged('quiz/error_types.json')
+```
+
+```{dropdown} Reminder: Types of errors (klick to expand)
 - The *irreducible error* is inherent in the data due to noise and factors beyond our control (unmeasured variables).
 
 - The *reducible error* arises from shortcomings in the model and can be further broken down into:
@@ -96,7 +105,7 @@ for degree, mse in zip(degrees, mse_list):
     print(f"{degree:<7} {mse:.3f}")
 ```
 
-However, if we evaluate the same models on new, unseen data, we see that the MSE is now increasing with increasing order of the polynomial regression model:
+However, things look different if we evaluate the same models on new, unseen data. Here, we draw a new sample with fresh noise at the same $x$ values and compute the MSE of the already fitted models:
 
 ```{code-cell} ipython3
 :tags: [remove-input]
@@ -144,14 +153,13 @@ for order, mse in zip(orders, mses):
 
 Please compare the previous plots and outputs. What do you notice?
 
-```{dropdown} Show answer
+:::{dropdown} Show answer
 Two things should become apparent:
 
 1. In contrast to the training MSE, which decreases with the order of the model, the test MSE is lowest for the 3rd order model.
 2. The test MSEs are generally higher than the training MSEs. This is to be expected, as the initial models did all, to some degree, fit to the noise in the training data.
-```
 
-This is because the 10th order model has too much *variance* — it is too close to the training data. If we fit such a model to multiple draws of samples from the population with a true association consistent with the cubic order polynomial, the model's predictive performance will always look different:
+As an experiment, we can further fit a 10th order model to multiple draws of samples from the same data population. You can see that the fitted curve looks very different every time. The model has high variance:
 
 ```{code-cell} ipython3
 :tags: [remove-input]
@@ -173,6 +181,11 @@ for a, seed in zip(ax, seeds):
 plt.tight_layout()
 plt.show()
 ```
+:::
+
+When we increase the flexibility of the model by adding more parameters, we are effectively trading between bias and variance. Initially, as the model becomes more flexible, its bias decreases quickly because it can capture more complex patterns in the data. However, this increased flexibility also makes the model more sensitive to the noise in the training data, which leads to a rise in variance.
+
+Eventually, the reduction in bias is no longer sufficient to counterbalance the increase in variance. This is why a model with a very low training MSE may still suffer from a high test MSE: the low training error is primarily a result of fitting the noise (i.e. high variance), rather than capturing a true underlying pattern.
 
 ```{figure} figures/bias_variance.drawio.png
 :name: fig-bias-variance
@@ -183,25 +196,22 @@ plt.show()
 The bias-variance tradeoff.
 ```
 
-When we increase the flexibility of the model by adding more parameters, we are effectively trading between bias and variance. Initially, as the model becomes more flexible, its bias decreases quickly because it can capture more complex patterns in the data. However, this increased flexibility also makes the model more sensitive to the noise in the training data, which leads to a rise in variance.
 
-Eventually, the reduction in bias is no longer sufficient to counterbalance the increase in variance. This is why a model with a very low training MSE may still suffer from a high test MSE: the low training error is primarily a result of fitting the noise (i.e. high variance), rather than capturing a true underlying pattern.
+## Decomposing the error
 
-<br />
+The figure above is usually drawn on a whiteboard and taken on faith. Because we simulated the data, we actually *know* the true function, so we can *measure* bias and variance instead of asserting them.
 
-## Decomposing the error yourself
+For this we can draw many training sets from the same data population, fit a model of a given degree to each of them, and compare their predictions at a new test point $x_0$ with the truth:
 
-The figure above is usually drawn on a whiteboard and taken on faith. Because we simulated the data, we actually know the true function, so we can *measure* bias and variance instead of asserting them.
+- **Bias²**: The bias is how far the average prediction over all training sets, $\mathbb{E}[\hat{f}(x_0)]$, is from the true value $f(x_0)$ ($\mathbb{E}$ stands for the mean). We square it so that it is in the same units as the other two terms: $\left(\mathbb{E}[\hat{f}(x_0)] - f(x_0)\right)^2$
+- **Variance**: How much the individual predictions scatter around their average, i.e. the mean squared distance of each prediction from the average prediction: $\mathrm{Var}[\hat{f}(x_0)] = \mathbb{E}\left[\left(\hat{f}(x_0) - \mathbb{E}[\hat{f}(x_0)]\right)^2\right]$
+- **Irreducible error**: A new observation $y_0 = f(x_0) + \varepsilon$ always contains random noise $\varepsilon$. Its variance $\sigma^2$ is the error that even a perfect model would make.
 
-The recipe is simple: draw many training sets from the same population, fit a model of a given degree to each of them, and then look at the predictions at a fixed test point $x_0$:
-
-- **Bias²** is how far the *average* prediction is from the truth: $\left(\mathbb{E}[\hat{f}(x_0)] - f(x_0)\right)^2$
-- **Variance** is how much the individual predictions scatter around that average: $\mathrm{Var}[\hat{f}(x_0)]$
-- **Irreducible error** is the noise variance $\sigma^2$, which no model can remove
-
-Their sum is the expected test MSE:
+Their sum is the expected test MSE at $x_0$:
 
 $$\mathbb{E}\left[(y_0 - \hat{f}(x_0))^2\right] = \underbrace{\mathrm{Bias}^2[\hat{f}(x_0)]}_{\text{too simple}} + \underbrace{\mathrm{Var}[\hat{f}(x_0)]}_{\text{too flexible}} + \underbrace{\sigma^2}_{\text{noise}}$$
+
+We do this for many test points and average the results:
 
 ```{code-cell} ipython3
 :tags: [hide-input]
@@ -212,15 +222,15 @@ rng = np.random.default_rng(0)
 
 # The true function and the noise level we simulate from
 f_true = lambda x: x**3 / 10
-sigma = 1.5
+sigma = 0.5                              # less noise than above, so the three parts are easier to tell apart
 n_train = 30
-n_sims = 400
+n_sims = 2000
 degrees = np.arange(1, 13)
 
 x_grid = np.linspace(-3, 3, 60)          # test points
 f_grid = f_true(x_grid)
 
-bias2, variance = [], []
+bias2_x, variance_x = {}, {}             # bias² and variance at each test point
 
 for degree in degrees:
     # Each row holds the predictions of one model, fitted to one simulated dataset
@@ -231,12 +241,13 @@ for degree in degrees:
         y_s = f_true(x_s) + rng.normal(0, sigma, size=n_train)
         preds[s] = np.polyval(np.polyfit(x_s, y_s, degree), x_grid)
 
-    mean_pred = preds.mean(axis=0)
-    bias2.append(np.mean((mean_pred - f_grid) ** 2))
-    variance.append(np.mean(preds.var(axis=0)))
+    # Average and spread over the simulated training sets (rows), separately for each test point (column)
+    bias2_x[degree] = (preds.mean(axis=0) - f_grid) ** 2
+    variance_x[degree] = preds.var(axis=0)
 
-bias2 = np.array(bias2)
-variance = np.array(variance)
+# Average over the test points to get one number per degree
+bias2 = np.array([bias2_x[d].mean() for d in degrees])
+variance = np.array([variance_x[d].mean() for d in degrees])
 total = bias2 + variance + sigma**2
 
 for d, b, v, t in zip(degrees, bias2, variance, total):
@@ -246,32 +257,31 @@ for d, b, v, t in zip(degrees, bias2, variance, total):
 ```{code-cell} ipython3
 :tags: [remove-input]
 
-fig, ax = plt.subplots(figsize=(7, 4.5))
+fig, ax = plt.subplots(figsize=(8, 5))
+
+best = degrees[np.argmin(total)]
+ax.axvline(best, color="crimson", ls="--", alpha=0.6, label=f"Optimal degree ({best})")
 ax.plot(degrees, bias2, "o-", label="Bias²")
 ax.plot(degrees, variance, "o-", label="Variance")
 ax.axhline(sigma**2, color="grey", ls=":", label="Irreducible error $\\sigma^2$")
 ax.plot(degrees, total, "o-", color="k", lw=2, label="Expected test MSE")
 
-best = degrees[np.argmin(total)]
-ax.axvline(best, color="crimson", ls="--", alpha=0.6)
-ax.annotate(f"best degree = {best}", xy=(best, total.max() * 0.8),
-            xytext=(best + 0.4, total.max() * 0.85), color="crimson")
-
-ax.set(xlabel="Polynomial degree (model flexibility)", ylabel="Error",
-       title="Measured bias-variance decomposition", xticks=degrees)
+ax.set(xlabel="Polynomial degree", ylabel="Error (averaged)", xticks=degrees)
 ax.set_yscale("log")
 ax.legend()
 plt.tight_layout()
 ```
 
-Notice that the measured curve has exactly the shape of the schematic figure: bias² collapses as soon as the model is flexible enough to represent a cubic, variance grows steadily, and their sum has a minimum at degree 3 — the degree we actually simulated from. The expected test MSE never drops below $\sigma^2 = 2.25$, no matter how good the model gets.
+Notice that the measured curves (very roughly) follow the schematic figure: bias² collapses as soon as the model is flexible enough to represent a cubic and the variance grows steadily.
 
 ```{tip} Summary
-Our goal is to minimize the reducible error by finding an optimal balance between bias and variance. Only then do we have a model that not only performs well on the training data but also generalizes effectively to new, unseen data.
+- The training error keeps decreasing as models become more flexible, so it cannot tell us which model is best.
+- Simple models have high bias, flexible models have high variance, and the best model minimizes their sum. No model can get below the irreducible error.
+- With real data, we do not know the true function and cannot compute bias and variance directly. Instead, we estimate the test error, which we will do in the [next session](3_resampling.md).
 ```
+
 
 ```{code-cell} ipython3
 :tags: [remove-input]
-from jupyterquiz import display_quiz
-display_quiz('quiz/bias_variance.json')
+display_quiz_paged('quiz/bias_variance.json')
 ```

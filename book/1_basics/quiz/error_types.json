@@ -1,0 +1,86 @@
+[
+    {
+        "question": "You predict depression scores from a questionnaire. Part of each person's score depends on how well they slept the night before, which you did not measure. Which type of error is this?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Irreducible error",
+                "correct": true,
+                "feedback": "Correct! No model can account for a variable that is not in the data."
+            },
+            {
+                "answer": "Bias",
+                "correct": false,
+                "feedback": "Not quite. Bias comes from the model being too simple, not from information missing in the data."
+            },
+            {
+                "answer": "Variance",
+                "correct": false,
+                "feedback": "Not quite. Variance is about how much the fitted model changes between training sets."
+            }
+        ]
+    },
+    {
+        "question": "You fit a straight line to a clearly U-shaped relationship. The predictions are systematically too high in the middle and too low at the edges. Which type of error dominates?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Bias",
+                "correct": true,
+                "feedback": "Correct! The model is too simple to represent the true relationship (underfitting)."
+            },
+            {
+                "answer": "Variance",
+                "correct": false,
+                "feedback": "Not quite. A straight line hardly changes between samples; the problem is its systematic mismatch with the data."
+            },
+            {
+                "answer": "Irreducible error",
+                "correct": false,
+                "feedback": "Not quite. A more flexible model could remove this error, so it is reducible."
+            }
+        ]
+    },
+    {
+        "question": "You fit the same model to two random samples from the same population and get two very different curves. Which type of error dominates?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Variance",
+                "correct": true,
+                "feedback": "Correct! The model is very sensitive to the particular training sample (overfitting)."
+            },
+            {
+                "answer": "Bias",
+                "correct": false,
+                "feedback": "Not quite. Bias is a systematic error that would show up in the same way for every sample."
+            },
+            {
+                "answer": "Irreducible error",
+                "correct": false,
+                "feedback": "Not quite. The noise in the data is the same for both samples; what differs is the fitted model."
+            }
+        ]
+    },
+    {
+        "question": "Collecting more training data (with the same model) mainly reduces...",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Variance",
+                "correct": true,
+                "feedback": "Correct! With more data, individual noisy observations have less influence on the fit."
+            },
+            {
+                "answer": "Bias",
+                "correct": false,
+                "feedback": "Not quite. A straight line stays a straight line no matter how much data you give it."
+            },
+            {
+                "answer": "Irreducible error",
+                "correct": false,
+                "feedback": "Not quite. The irreducible error cannot be reduced by any model or amount of data."
+            }
+        ]
+    }
+]

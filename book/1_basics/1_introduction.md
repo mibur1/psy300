@@ -28,12 +28,12 @@ Three main types of machine learning: supervised, unsupervised, and reinforcemen
 
 ## Classes of algorithms
 
-In addition to the type of learning, algorithms can also be categorized based on the type of data that needs to be predicted:
+In addition to the type of learning, algorithms can also be categorized based on the type of data they deal with. In supervised learning, this is the type of the outcome we want to predict. In unsupervised learning, there is no outcome, so it is the type of structure we are looking for: discrete groups (clustering) or continuous underlying dimensions (dimensionality reduction):
 
 | Type of data                  | Supervised learning<br />(labeled outcomes) | Unsupervised learning<br />(no labeled outcomes) |
 |-------------------------------|---------------------------------------------|--------------------------------------------------|
 | **Qualitative (categorical)** | Classification                              | Clustering                                       |
-| **Quantitative (numerical)**  | Regression                                  | Dimensionality reduction<br />Clustering         |
+| **Quantitative (numerical)**  | Regression                                  | Dimensionality reduction                         |
 
 Almost every chapter of this book fills in one cell of this table. If you ever lose track of where a method belongs, come back here.
 
@@ -44,6 +44,8 @@ Assessing the performance of a machine learning model is crucial to ensure its a
 - **Mean Squared Error (MSE)**: Measures the average squared difference between predicted and actual values (regression tasks).
 - **Misclassification error**: Describes the proportion of incorrectly predicted class assignments (classification tasks).
 
-There are many more performance (accuracy) metrics (which you might already know), such as the Root Mean Squared Error (RMSE), R-squared (R²), precision, or a confusion matrix. You will get to know some of them in the following weeks.
+There are many more performance metrics (some of which you might already know), such as the Root Mean Squared Error (RMSE), R-squared (R²), accuracy, or precision and recall, which can be derived from a confusion matrix. You will get to know some of them in the following weeks.
 
-In addition, techniques such as *cross-validation* help to estimate the performance of a model in an unbiased manner. Cross-validation splits the dataset into training and testing subsets, reducing the risk of overfitting and providing a better assessment of how the model will perform on unseen data. We will explore this topic in the [](3_resampling.md) session.
+Importantly, we usually do not care how well a model describes the data it was trained on (the *training error*), but how well it predicts new, unseen data (the *test error*). These two can be very different, as you will see in the next session on the bias-variance tradeoff.
+
+Techniques such as *cross-validation* help to estimate this test error. Cross-validation repeatedly splits the dataset into training and testing subsets, so that the model is always evaluated on data it has not seen during training. This does not prevent overfitting by itself, but it reveals it and helps us choose models that generalize well. We will explore this topic in the [](3_resampling.md) session.
