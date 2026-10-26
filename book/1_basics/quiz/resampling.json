@@ -1,0 +1,82 @@
+[
+    {
+        "question": "Why did 5-fold CV without shuffling give such a low accuracy on the iris data?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The rows are sorted by species, so the validation folds contained species that were underrepresented in training",
+                "correct": true,
+                "feedback": "Correct! The low accuracy is caused by the row order, not by the model."
+            },
+            {
+                "answer": "5 folds are too few for 150 observations",
+                "correct": false,
+                "feedback": "Not quite. With shuffling, the same 5 folds give a reasonable accuracy of 0.81."
+            },
+            {
+                "answer": "Without shuffling, the folds overlap",
+                "correct": false,
+                "feedback": "Not quite. The folds never overlap in k-fold CV, with or without shuffling."
+            }
+        ]
+    },
+    {
+        "question": "You run LOOCV on a dataset with 200 observations. How many models are fitted?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "value",
+                "value": 200,
+                "correct": true,
+                "feedback": "Correct! LOOCV fits one model per observation."
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. In LOOCV, k equals the number of observations, and every fold is left out once."
+            }
+        ]
+    },
+    {
+        "question": "You ran 5-fold CV and the model from fold 2 had the highest accuracy. Which model do you use to make predictions on new data?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "A new model, fitted on the complete dataset",
+                "correct": true,
+                "feedback": "Correct! The fold models only serve to estimate performance."
+            },
+            {
+                "answer": "The model from fold 2",
+                "correct": false,
+                "feedback": "Not quite. Fold 2 probably just had an easier validation fold."
+            },
+            {
+                "answer": "The average of the five fold models",
+                "correct": false,
+                "feedback": "Not quite. The fold models are only used to estimate the performance. Each of them also saw only 80% of the data."
+            }
+        ]
+    },
+    {
+        "question": "You compare 10 models and pick the one with the best score on your test set. How good is that score as an estimate of the performance on new data?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Too optimistic",
+                "correct": true,
+                "feedback": "Correct! Choosing the best of 10 scores favors models that got lucky on this test set. You would need a separate test set to evaluate the chosen model."
+            },
+            {
+                "answer": "Unbiased",
+                "correct": false,
+                "feedback": "Not quite. By choosing a model based on the test set, you used it as a validation set."
+            },
+            {
+                "answer": "Too pessimistic",
+                "correct": false,
+                "feedback": "Not quite. Picking the best of several scores tends to favor models that got lucky."
+            }
+        ]
+    }
+]

@@ -1,6 +1,6 @@
 [
     {
-        "front": "Can you think of any disadvantages of the validation set approach? (click me)",
-        "back": "A key disadvantage of the validation set approach is that its performance estimates can have high variance. This means that the results may vary significantly depending on which data points end up in the training set versus the validation set."
+        "front": "Is the validation accuracy a biased estimate of the performance on new data, a high-variance estimate, or both? (click for answer)",
+        "back": "Both. Variance: the result depends on which observations end up in the training and validation set. Bias: the model is trained on only 60% of the data, so it is likely worse than a model trained on all data, and the estimate is too pessimistic."
     }
 ]
