@@ -1,0 +1,107 @@
+[
+    {
+        "question": "Why do we standardize the predictors before fitting Ridge or Lasso?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The penalty depends on the size of the coefficients, which depends on the units of the predictors",
+                "correct": true,
+                "feedback": "Correct! A predictor measured in large units gets a small coefficient and would hardly be penalized. After standardizing, all coefficients are penalized on the same scale."
+            },
+            {
+                "answer": "Ridge and Lasso only work with normally distributed predictors",
+                "correct": false,
+                "feedback": "Not quite. Standardizing does not change the shape of the distribution."
+            },
+            {
+                "answer": "It makes the model fit faster",
+                "correct": false,
+                "feedback": "Not quite. It can help the optimization a bit, but the main reason is that the penalty treats all coefficients equally."
+            }
+        ]
+    },
+    {
+        "question": "What happens to the bias and the variance of a Ridge model when λ increases?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The bias increases, the variance decreases",
+                "correct": true,
+                "feedback": "Correct! The coefficients are pulled towards zero (more bias), but they also depend less on the particular training data (less variance)."
+            },
+            {
+                "answer": "The bias decreases, the variance increases",
+                "correct": false,
+                "feedback": "Not quite. This is what happens when λ decreases towards 0, i.e. towards ordinary least squares."
+            },
+            {
+                "answer": "Both decrease",
+                "correct": false,
+                "feedback": "Not quite. Regularization trades one for the other."
+            }
+        ]
+    },
+    {
+        "question": "Which method can set coefficients exactly to zero?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Lasso",
+                "correct": true,
+                "feedback": "Correct! The corners of the L1 budget make exact zeros likely."
+            },
+            {
+                "answer": "Ridge",
+                "correct": false,
+                "feedback": "Not quite. Ridge shrinks coefficients towards zero, but they practically never become exactly zero."
+            },
+            {
+                "answer": "Neither of them",
+                "correct": false,
+                "feedback": "Not quite. Think back to the counter in the interactive plot."
+            }
+        ]
+    },
+    {
+        "question": "What does a Ridge model with λ = 0 correspond to?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Ordinary least squares regression",
+                "correct": true,
+                "feedback": "Correct! Without a penalty, only the RSS is minimized."
+            },
+            {
+                "answer": "A model with all coefficients equal to zero",
+                "correct": false,
+                "feedback": "Not quite. That happens when λ becomes very large."
+            },
+            {
+                "answer": "Lasso regression",
+                "correct": false,
+                "feedback": "Not quite. With λ = 0, the type of penalty does not matter anymore."
+            }
+        ]
+    },
+    {
+        "question": "Two predictors are strongly correlated. How do Ridge and Lasso typically handle them?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Ridge shares the weight between both, Lasso tends to keep only one",
+                "correct": true,
+                "feedback": "Correct! This is one of the reasons why Elastic Net combines both penalties."
+            },
+            {
+                "answer": "Ridge keeps only one, Lasso shares the weight between both",
+                "correct": false,
+                "feedback": "Not quite. It is the other way round."
+            },
+            {
+                "answer": "Both remove the two predictors from the model",
+                "correct": false,
+                "feedback": "Not quite. Correlated predictors usually both carry useful information."
+            }
+        ]
+    }
+]

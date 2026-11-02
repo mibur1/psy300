@@ -1,22 +1,70 @@
-[{
-    "question": "Which of the following statements is true about the subset selection methods?",
-    "type": "multiple_choice",
-    "answers": [ 
-        {
-            "answer": "For best subset selection you have to test 2^p models.",
-            "correct": true
-        },
-        {
-            "answer": "Backward stepwise selection is preferred over forward stepwise selection when p>n.",
-            "correct": false
-        },
-        {
-            "answer": "A model with all potential predictors will always have the largest training R\u00b2.",
-            "correct": true
-        },
-        {
-            "answer": "Backward stepwise selection starts with a full model.",
-            "correct": true
-        }
-    ]
-}]
+[
+    {
+        "question": "Which statements about subset selection are true? (Select all that apply)",
+        "type": "many_choice",
+        "answers": [
+            {
+                "answer": "Best subset selection has to evaluate 2^p models",
+                "correct": true,
+                "feedback": "Correct! Every predictor can be in the model or not."
+            },
+            {
+                "answer": "Backward stepwise selection starts with the full model",
+                "correct": true,
+                "feedback": "Correct! It then removes one predictor at a time."
+            },
+            {
+                "answer": "Backward stepwise selection is preferred over forward stepwise selection when p > n",
+                "correct": false,
+                "feedback": "Not quite. Backward selection starts with the full model, which cannot be fitted when p > n."
+            },
+            {
+                "answer": "Forward stepwise selection always finds the same subset as best subset selection",
+                "correct": false,
+                "feedback": "Not quite. It did here, but a greedy search can miss the best combination."
+            }
+        ]
+    },
+    {
+        "question": "You add one more predictor to a linear regression model. What happens to the R² on the training data?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "It increases or stays the same",
+                "correct": true,
+                "feedback": "Correct! The model can always set the new coefficient to zero, so the fit on the training data cannot get worse. This is why we compare models with cross-validation."
+            },
+            {
+                "answer": "It can increase or decrease",
+                "correct": false,
+                "feedback": "Not quite. That is true for the cross-validated or test R², but not for the training R²."
+            },
+            {
+                "answer": "It always decreases",
+                "correct": false,
+                "feedback": "Not quite. Think about what the model could do with a useless predictor: set its coefficient to zero."
+            }
+        ]
+    },
+    {
+        "question": "Why do we still need a separate test set, even though the feature selection already uses cross-validation?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Because the best of many CV scores is too optimistic for the selected model",
+                "correct": true,
+                "feedback": "Correct! We picked the subset with the highest CV score, so its score is partly luck."
+            },
+            {
+                "answer": "Because cross-validation does not work for linear regression",
+                "correct": false,
+                "feedback": "Not quite. Cross-validation works for any model."
+            },
+            {
+                "answer": "Because the test set is larger than the CV folds",
+                "correct": false,
+                "feedback": "Not quite. The size is not the issue. The CV scores were used to choose the model, so they cannot also give an unbiased estimate of its performance."
+            }
+        ]
+    }
+]

@@ -1,18 +1,25 @@
-
-[{
-    "question":"When using Best Subset Selection to predict Salary with 9 predictors, how many different models (i.e., combinations of predictors) must be evaluated?",
-    "type": "numeric",
-    "answers": [
-        {
-            "type": "value",
-            "value": 512,
-            "correct": true,
-            "feedback": "Correct!"  
-        },
-        {
-            "type": "default",
-            "correct": false,
-            "feedback": "Not quite.  Remember: Best Subset Selection tries all possible combinations of predictors (2^p models)."
-        }
-    ]
-}]
+[
+    {
+        "question": "Our data contains 7 predictors. How many different models (i.e. combinations of predictors) does best subset selection have to evaluate?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "value",
+                "value": 128,
+                "correct": true,
+                "feedback": "Correct! There are 2^7 = 128 possible subsets. mlxtend skips the empty model without any predictors, so it actually fits 127 of them."
+            },
+            {
+                "type": "value",
+                "value": 127,
+                "correct": true,
+                "feedback": "Correct! There are 2^7 = 128 possible subsets, and 127 of them contain at least one predictor."
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. Each predictor can either be in the model or not, so there are 2 × 2 × ... × 2 = 2^p combinations."
+            }
+        ]
+    }
+]
