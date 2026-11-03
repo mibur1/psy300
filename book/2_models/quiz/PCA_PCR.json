@@ -1,0 +1,104 @@
+[
+    {
+        "question": "Your data contains a reaction time in milliseconds and an accuracy score between 0 and 1. What happens if you run a PCA without standardizing the features first?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "PC1 points almost exactly along the reaction time",
+                "correct": true,
+                "feedback": "Correct! Reaction times in milliseconds have a much larger variance than a score between 0 and 1, so they dominate the direction of maximal variance."
+            },
+            {
+                "answer": "PC1 points almost exactly along the accuracy score",
+                "correct": false,
+                "feedback": "Not quite. PCA looks for the largest variance. Which feature varies more in absolute numbers?"
+            },
+            {
+                "answer": "Nothing, PCA does not depend on the units of the features",
+                "correct": false,
+                "feedback": "Not quite. The variance of a feature depends on its units, and PCA is based on the variance."
+            }
+        ]
+    },
+    {
+        "question": "A dataset has 200 observations and 10 variables. How many principal components can PCA find at most?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "value",
+                "value": 10,
+                "correct": true,
+                "feedback": "Correct! With p variables, there are at most p components (as long as there are more observations than variables)."
+            },
+            {
+                "type": "value",
+                "value": 200,
+                "correct": false,
+                "feedback": "Not quite. The components are directions in the space of the variables. How many dimensions does this space have?"
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. Each component is a new axis in the space of the variables."
+            }
+        ]
+    },
+    {
+        "question": "What is the main difference between PCR and PLS?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "PLS uses the target y to build its components, PCR does not",
+                "correct": true,
+                "feedback": "Correct! PCR uses the principal components of X, which are found without looking at y. PLS looks for directions that covary with y."
+            },
+            {
+                "answer": "PCR is a regression method, PLS is a classification method",
+                "correct": false,
+                "feedback": "Not quite. Both are regression methods."
+            },
+            {
+                "answer": "PLS always predicts better than PCR",
+                "correct": false,
+                "feedback": "Not quite. PLS can find predictive directions that PCR misses, but it can also adapt more to the training data. In practice, both often perform similarly."
+            }
+        ]
+    },
+    {
+        "question": "You fit a PCR model with all p components. Which model do you get?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The same model as ordinary linear regression with all predictors",
+                "correct": true,
+                "feedback": "Correct! The p components contain exactly the same information as the p predictors, so nothing is reduced."
+            },
+            {
+                "answer": "A model with less variance than linear regression",
+                "correct": false,
+                "feedback": "Not quite. Only keeping fewer components reduces the variance."
+            },
+            {
+                "answer": "A Ridge model",
+                "correct": false,
+                "feedback": "Not quite. PCR does not shrink the coefficients."
+            }
+        ]
+    },
+    {
+        "question": "After PCR with 3 components, can you tell which of the original predictors are irrelevant for the model?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "No, each component is a weighted sum of all predictors",
+                "correct": true,
+                "feedback": "Correct! All predictors still enter the model through the components. If you want to remove predictors, use Lasso or subset selection."
+            },
+            {
+                "answer": "Yes, the predictors that are not part of the 3 components are irrelevant",
+                "correct": false,
+                "feedback": "Not quite. Every predictor contributes to every component, even if some loadings are small."
+            }
+        ]
+    }
+]
