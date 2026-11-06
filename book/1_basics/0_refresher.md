@@ -33,7 +33,7 @@ pio.templates["psy300"] = psy300
 pio.templates.default = "psy300"
 ```
 
-One of the most important concepts in any multivariate statistics seminar such as [psy111](https://mibur1.github.io/psy111) are (linear) regression models. Let's quickly recap this concept and how to implement it in Python.
+One of the most important concepts in any multivariate statistics seminar such as [psy111](https://michaburkhardt.de/psy111) are (linear) regression models. Let's quickly recap this concept and how to implement it in Python.
 
 Have a look at the following code, which creates some simulated data. Can you deduce from the code what the underlying pattern is?
 
