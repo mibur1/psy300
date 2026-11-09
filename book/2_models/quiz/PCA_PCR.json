@@ -86,18 +86,23 @@
         ]
     },
     {
-        "question": "After PCR with 3 components, can you tell which of the original predictors are irrelevant for the model?",
+        "question": "You fit a PCR model with 3 components on data with 10 predictors. How many of the original predictors does the model still use?",
         "type": "multiple_choice",
         "answers": [
             {
-                "answer": "No, each component is a weighted sum of all predictors",
+                "answer": "All 10, because each component is a weighted sum of all predictors",
                 "correct": true,
-                "feedback": "Correct! All predictors still enter the model through the components. If you want to remove predictors, use Lasso or subset selection."
+                "feedback": "Correct! The loadings show that some predictors contribute more than others, but none of them is removed from the model. If you want to remove predictors, use Lasso or subset selection."
             },
             {
-                "answer": "Yes, the predictors that are not part of the 3 components are irrelevant",
+                "answer": "3, one for each component",
                 "correct": false,
-                "feedback": "Not quite. Every predictor contributes to every component, even if some loadings are small."
+                "feedback": "Not quite. A component is not a single predictor, but a weighted sum of all of them."
+            },
+            {
+                "answer": "Only those with a loading above 0.5",
+                "correct": false,
+                "feedback": "Not quite. Small loadings mean that a predictor contributes little, but it is still part of the component."
             }
         ]
     }

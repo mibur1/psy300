@@ -14,13 +14,17 @@ Principal Component Analysis (PCA) is an *unsupervised* method for *dimensionali
 
 PCA finds new axes for the data, the *principal components* (PCs). PC1 points in the direction in which the data vary most. PC2 is perpendicular to PC1 and captures the largest remaining variance, and so on. With $p$ variables, there are at most $p$ components. Mathematically, the components are the eigenvectors of the covariance matrix of the data.
 
-Each component is a weighted sum of the original variables:
+Each component gives us a new variable, which is a weighted sum of the original variables. We call the new variable for PC1 $Z_1$:
 
 $$
 Z_1 = \phi_{11} X_1 + \phi_{21} X_2 + \dots + \phi_{p1} X_p
 $$
 
-$X_1, \dots, X_p$ are the (centered) variables. The weights $\phi_{11}, \dots, \phi_{p1}$ are the *loadings*: they tell us how much each variable contributes to PC1, and together they form its direction (the red arrow in the plot below). If we plug in the values of one observation, we get its *score* on PC1, i.e. its position along this axis. Keeping only the first few components, we can describe each observation with a few scores instead of all $p$ values. In scikit-learn, `pca.components_` holds the loadings and `pca.transform()` returns the scores.
+$X_1, \dots, X_p$ are the original (centered) variables. The weights $\phi_{11}, \dots, \phi_{p1}$ are the *loadings*: they tell us how much each variable contributes to PC1, and together they form its direction (the red arrow in the plot below).
+
+Like any other variable, $Z_1$ has one value per observation, called the *score*. It tells us where the observation lies along the PC1 axis. Say we measured height and weight, and PC1 has the loadings 0.6 and 0.8. Then $Z_1 = 0.6 \cdot \text{height} + 0.8 \cdot \text{weight}$. A person who is 2 cm taller and 4 kg heavier than average has a score of $0.6 \cdot 2 + 0.8 \cdot 4 = 4.4$.
+
+The other components work the same way and give us $Z_2$, $Z_3$, and so on. If we keep only the first few of these new variables, we can describe each observation with a few scores instead of all $p$ original values. In scikit-learn, `pca.components_` holds the loadings and `pca.transform()` returns the scores.
 
 ```{code-cell} ipython3
 import numpy as np
@@ -83,7 +87,7 @@ print(loadings.round(2))
 print("\nExplained variance ratio:", pca.explained_variance_ratio_.round(3))
 ```
 
-* **`pca.components_`** contains the loadings. Each row is one component, and each entry tells us how strongly a feature contributes to it. PC1 is dominated by petal length (0.86), while PC2 is mostly made up of the two sepal measures.
+* **`pca.components_`** contains the loadings, with one row per component and one column per feature. PC1 is dominated by petal length (0.86), while PC2 is mostly made up of the two sepal measures.
 * **`pca.explained_variance_ratio_`** is the fraction of the total variance that each component explains. PC1 alone explains 92.5%.
 
 :::{important} Standardize before PCA
@@ -103,6 +107,7 @@ components = np.arange(1, len(evr) + 1)
 
 fig, ax = plt.subplots(1, 2, figsize=(10, 3.5))
 ax[0].bar(components, evr)
+ax[0].plot(components, evr, marker="o", color="C1")
 ax[0].set(xlabel="Component", ylabel="Explained variance ratio", title="Scree plot", xticks=components)
 ax[1].plot(components, evr.cumsum(), marker="o")
 ax[1].axhline(0.95, color="gray", linestyle="--")
@@ -114,7 +119,7 @@ A common rule of thumb is to look for the "elbow" in the scree plot, or to keep 
 
 ### Projecting the data
 
-Finally, we can project the data onto the components with `.transform()`. This centers the data (subtracts each feature's mean) and then computes the scores for each component. The result `X_pca` has the shape `(n_samples, 3)`:
+Finally, we can project the data onto the components with `.transform()`. `.fit()` learned the components and the feature means but did not change `X_iris`, so `.transform()` first subtracts the means and then computes the scores for each component. The result `X_pca` has the shape `(n_samples, 3)`:
 
 ```{code-cell} ipython3
 # Project (transform) the data into the first 3 PCs
@@ -184,7 +189,7 @@ Note that PCA never saw the species labels. It found a direction that separates 
 
 ## Principal Component Regression
 
-Ridge and Lasso deal with correlated or many predictors by shrinking the regression coefficients. Principal Component Regression (PCR) takes a different approach and changes the predictors themselves:
+Principal Component Regression (PCR) uses the components for prediction. Instead of shrinking the coefficients like Ridge and Lasso, it changes the predictors themselves:
 
 1. Run a PCA on the predictors $X$ and keep the first $M$ components.
 2. Fit a linear regression of $y$ on the new variables $Z_1, \dots, Z_M$ instead of the original predictors $X_1, \dots, X_p$:
@@ -197,32 +202,28 @@ We write $\theta$ instead of $\beta$ for the coefficients, because they belong t
 
 The components are uncorrelated with each other, so the problem of correlated predictors disappears, and with $M < p$ we have fewer coefficients to estimate. The number of components $M$ controls the bias-variance trade-off, just like λ in Ridge and Lasso. With $M = p$, PCR is identical to ordinary linear regression. With fewer components, the model has less variance but more bias. We choose $M$ with cross-validation.
 
-PCR works well when the directions of high variance in $X$ are also the ones that predict $y$. But since PCA ignores $y$, there is no guarantee for this. To see what can go wrong, let's have another look at the simulated data from above:
+PCR works well when the directions of high variance in $X$ are also the ones that predict $y$. To see what can go wrong when they are not, let's go back to the simulated data from above. This time, we construct a target that depends on the **low-variance** direction, PC2. The color of each point shows its value of $y$:
 
 ```{code-cell} ipython3
 :tags: [hide-input]
 
-fig, ax = plt.subplots()
-ax.scatter(X[:, 0], X[:, 1], alpha=0.3, label='Data')
-ax.arrow(*mean, *(pcs[0] * scales[0] * 3), head_width=0.2, head_length=0.3, color='r', linewidth=2, label='PC1')
-ax.arrow(*mean, *(pcs[1] * scales[1] * 3), head_width=0.2, head_length=0.3, color='b', linewidth=2, label='PC2')
-ax.set(xlabel="Feature 1", ylabel="Feature 2", title="PCA for 2D data")
-ax.axis('equal')
-ax.legend();
-```
+from matplotlib.colors import LinearSegmentedColormap
 
-For this example, we construct the target so that it depends on the **low-variance** direction, PC2:
-
-```{code-cell} ipython3
 y = X.dot(pca2d.components_[1]) + rng.normal(size=500) / 2
 
-fig, ax = plt.subplots(1, 2, figsize=(10, 3))
-ax[0].scatter(X.dot(pca2d.components_[0]), y, alpha=0.3)
-ax[0].set(xlabel="Projection on PC1", ylabel="y", title="High-variance direction")
-ax[1].scatter(X.dot(pca2d.components_[1]), y, alpha=0.3)
-ax[1].set(xlabel="Projection on PC2", ylabel="y", title="Low-variance direction")
-plt.tight_layout();
+blue_orange = LinearSegmentedColormap.from_list("blue_orange", ["#1f77b4", "#eeeeee", "#ff7f0e"])
+
+fig, ax = plt.subplots()
+points = ax.scatter(X[:, 0], X[:, 1], c=y, cmap=blue_orange, vmin=-2, vmax=2, alpha=0.8)
+ax.arrow(*mean, *(pcs[0] * scales[0] * 3), head_width=0.2, head_length=0.3, color='k', linewidth=2, label='PC1')
+ax.arrow(*mean, *(pcs[1] * scales[1] * 3), head_width=0.2, head_length=0.3, color='gray', linewidth=2, label='PC2')
+ax.set(xlabel="Feature 1", ylabel="Feature 2", title="Target aligned with the low-variance direction")
+ax.axis('equal')
+ax.legend()
+fig.colorbar(points, label="y");
 ```
+
+The color changes across the cloud, along PC2, and hardly at all along PC1.
 
 We now fit a PCR with a single component. A pipeline lets us chain the scaling, the PCA, and the regression into one model:
 
@@ -250,10 +251,6 @@ plt.show()
 print(f"PCR R²: {pcr.score(X_test, y_test):.3f}")
 ```
 
-:::{tip} Pipelines
-`pcr[:-1]` selects all steps of the pipeline except the last one (the regression). The test data are therefore scaled with the training mean and standard deviation before they are projected. When you call `pcr.fit()` or `pcr.predict()`, the pipeline takes care of this automatically. This also matters for cross-validation: if you pass the whole pipeline to `cross_val_score()`, the scaler and the PCA are fitted on the training folds only.
-:::
-
 PCA keeps the direction of highest variance (PC1), but PC2 contains the predictive signal. With one component, PCR therefore does not predict anything: the R² is around 0. If we add the second component, PCR captures the predictive direction and performs much better:
 
 ```{code-cell} ipython3
@@ -264,9 +261,13 @@ print(f"PCR (2 components) R²: {pcr_2.score(X_test, y_test):.3f}")
 
 Of course, with two components out of two features we are back at ordinary linear regression and have not reduced anything. The example is extreme on purpose, but the same thing happens in real data: a component that explains little variance in $X$ can still be important for predicting $y$. You will see an example of this in the exercise.
 
+:::{tip} Pipelines
+In the code above, `pcr[:-1]` selects all steps of the pipeline except the last one (the regression). The test data are therefore scaled with the training mean and standard deviation before they are projected. When you call `pcr.fit()` or `pcr.predict()`, the pipeline takes care of this automatically. This also matters for cross-validation: if you pass the whole pipeline to `cross_val_score()`, the scaler and the PCA are fitted on the training folds only.
+:::
+
 ## Partial Least Squares Regression
 
-Partial Least Squares (PLS) regression also builds new components from the predictors, but unlike PCA, it uses the target $y$ to do so. PLS is therefore a *supervised* method.
+As we just saw, PCR can miss a predictive direction because it chooses its components without looking at $y$. Partial Least Squares (PLS) regression addresses this: it also builds new components from the predictors, but it uses the target $y$ to do so. PLS is therefore a *supervised* method.
 
 The first PLS component is a weighted sum of the predictors, just like a principal component. The difference lies in how the weights are chosen. PCA picks the direction with the largest variance in $X$. PLS picks the direction with the largest covariance with $y$: each (standardized) predictor gets a weight proportional to its covariance with $y$. The next components are found in the same way on what is left of $X$ and $y$ after removing the previous components. Because of this, PLS can find a predictive direction even if it only explains a small part of the variance in $X$.
 
@@ -288,22 +289,22 @@ plt.show()
 print(f"PLS R²: {pls.score(X_test, y_test):.3f}")
 ```
 
-Even with a single component, PLS finds the predictive direction, because it uses the target to build its components. It reaches almost the same R² as PCR with both components.
+Even with a single component, PLS finds the predictive direction and reaches almost the same R² as PCR with both components.
 
-This does not mean that PLS is always better. Since it uses $y$, PLS can adapt more closely to the training data, which means more variance. In practice, PCR and PLS often perform similarly, and in both cases we choose the number of components with cross-validation.
+This does not mean that PLS is always better. Since it uses $y$, PLS can adapt more closely to the training data, which means more variance. In practice, PCR and PLS often perform similarly.
 
 ## Summary
 
 | | PCA | PCR | PLS |
 |---|---|---|---|
-| Type | Unsupervised | Supervised (regression) | Supervised (regression) |
-| Components | Directions of maximal variance in $X$ | Principal components of $X$ | Directions of maximal covariance with $y$ |
-| Uses $y$ to build components? | No | No | Yes |
-| Tuning parameter | Number of components | Number of components | Number of components |
+| What it does | Reduces the number of variables | PCA, then a regression on the components | Builds components, then a regression on them |
+| Components maximize | Variance in $X$ | Variance in $X$ | Covariance with $y$ |
+| Uses $y$ to find the components? | No | No | Yes |
+| Predicts $y$? | No | Yes | Yes |
 
-* All three methods replace the $p$ original predictors with a smaller number of components. Each component is a weighted sum of **all** predictors, so unlike Lasso or subset selection, none of these methods removes predictors from the model.
-* Standardize the predictors first, otherwise the predictors with the largest variance dominate the components.
-* With all $p$ components, PCR and PLS are identical to ordinary linear regression.
+* All three methods can find up to $p$ components from the $p$ original variables, and we usually keep only the first few. Each component is a weighted sum of **all** variables, so unlike Lasso or subset selection, none of these methods removes variables from the model.
+* Standardize the variables first, otherwise the variables with the largest variance dominate the components.
+* With all $p$ components, PCR and PLS are identical to ordinary linear regression. We choose the number of components with cross-validation.
 
 ```{code-cell} ipython3
 :tags: [remove-input]
@@ -312,4 +313,4 @@ from quizpager import display_quiz_paged
 display_quiz_paged('quiz/PCA_PCR.json')
 ```
 
-**Now it's your turn:** head to the [exercise section](Exercises.ipynb) for Exercise 3, in which you will apply PCA, PCR, and PLS to a medical dataset.
+**Now it's your turn:** head to the [exercise section](Exercises.ipynb) for Exercises 3 and 3.2, in which you will apply PCA, PCR, and PLS to a medical dataset.
