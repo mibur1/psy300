@@ -6,14 +6,14 @@ kernelspec:
 ---
 # ➗ LDA & QDA
 
-We have previously introduced logistic regression as a classification algorithm. It belongs to a class of models referred to as **discriminative models**. This means they try to establish a decision boundary (discriminator), which best separates the classes.
+Logistic regression directly models the probability of a class given the features, $P(Y \mid X)$. It is a **discriminative model**: it only cares about the decision boundary that separates the classes.
 
-In contrast, **generative models** such as Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA) (and also Naïve Bayes, which will be introduced in the next session) see the world with different eyes! They are focused on learning the *underlying distribution* of the data and its labels.
+**Generative models** such as Linear Discriminant Analysis (LDA), Quadratic Discriminant Analysis (QDA), and Naïve Bayes (which will be introduced in the next session) go the other way round. They model how the features are distributed within each class, and then use Bayes' theorem to get the probability of each class.
 
 ```{tip} Generative models
 
 - Learn the distribution of features for each class, not just how to separate them
-- Use this information to calculate the likelihood of new data belonging to each class
+- Use this information to calculate the probability that a new observation belongs to each class
 - Can generate new samples by sampling from the learned distributions
 ```
 
@@ -21,10 +21,10 @@ In contrast, **generative models** such as Linear Discriminant Analysis (LDA) an
 
 LDA assumes that:
 
-- The features are distributed according to a multivariate Gaussian distribution
-- Classes share the same covariance matrix
+- Within each class, the features follow a multivariate Gaussian distribution
+- All classes share the same covariance matrix
 
-As a visual intuition in a 2D case (2 predictors), this means the class distributions look like ellipses with the same shape and orientation (but centred at different locations if there is a difference between the classes). In detail, LDA requires 4 steps to make a decision:
+As a visual intuition in a 2D case (2 predictors), this means the class distributions look like ellipses with the same shape and orientation (but centered at different locations if the classes differ). In detail, LDA requires 4 steps to make a decision:
 
 - **Step 1**: Model the distribution of the predictors $X$ separately for each response class $Y$
 - **Step 2**: Use Bayes' theorem to calculate estimates for the posterior probability
@@ -46,11 +46,9 @@ where:
 - $X$ is the feature vector
 - $p$ is the number of features
 - $\mu_k$ is the mean vector of class $k$
-- $\Sigma$ is the pooled covariance matrix over all classes
+- $\Sigma$ is the covariance matrix shared by all classes
 
-In practice, we do not know $\mu_k$ and $\Sigma$, so we estimate them from the training data.
-
-> 💡 Key Assumption: LDA assumes that all classes share the same covariance matrix $\Sigma$. This makes the decision boundaries linear.
+In practice, we do not know $\mu_k$ and $\Sigma$, so we estimate them from the training data: $\mu_k$ is the mean of the observations in class $k$, and $\Sigma$ is the average of the covariance matrices within the classes (the *pooled* covariance matrix).
 
 ---
 
@@ -65,26 +63,24 @@ $$
 where:
 
 - $P(X | Y = k)$ is the likelihood (the Gaussian density from Step 1)
-- $P(Y = k)$ is the prior probability of class $k$
+- $P(Y = k)$ is the prior probability of class $k$, which we also write as $\pi_k$
 - $P(X)$ is the evidence (the overall probability of observing $X$)
 
 The prior $P(Y = k)$ is typically estimated as the relative frequency of class $k$ in the training data, unless we want to impose different priors.
 
-> 💡 We model how each class generates the data, and then use Bayes' theorem to "flip" this around and find the most likely class for a new point.
-
 ---
 
-When performing classification, we only need to compare which posterior probability is largest. Taking the logarithm preserves the order of the probabilities while simplifying multiplication into addition. Further, the evidence $P(X)$ is the same across all classes (because it is the sum over all classes) and therefore does not affect the relative ranking. This allows us to drop it and work with proportionality ($\propto$):
+To classify a new observation, we only need to know which class has the largest posterior probability. Taking the logarithm preserves the order of the probabilities and turns multiplication into addition. The evidence $P(X)$ is the same for all classes, so it does not affect the ranking and becomes a constant:
 
 $$
-\log P(Y = k | X) \propto \log P(X | Y = k) + \log P(Y = k)
+\log P(Y = k | X) = \log P(X | Y = k) + \log P(Y = k) + \text{const}
 $$
 
 ---
 
 **Step 3: Derive the Discriminant Function**
 
-We can then perform some linear algebra (substitute the multivariate Gaussian density into the log expression, expand the quadratic form, and remove terms independent of the class $k$; see [James et al. (ISLR) Chapter 4.4](https://www.statlearning.com/) if you are interested in the details). This will then result in the discriminant function $\delta_k(X)$:
+If we substitute the Gaussian density from Step 1 into this expression and expand it, we can remove all terms that do not depend on the class $k$ (see [James et al. (ISLR) Chapter 4.4](https://www.statlearning.com/) if you are interested in the details). This includes the quadratic term $X^T \Sigma^{-1} X$, which is the same for all classes because they share $\Sigma$. What remains is the discriminant function $\delta_k(X)$:
 
 $$
 \delta_k(X) = X^T \Sigma^{-1} \mu_k - \frac{1}{2} \mu_k^T \Sigma^{-1} \mu_k + \log(\pi_k)
@@ -92,11 +88,11 @@ $$
 
 where:
 
-- $X^T \Sigma^{-1} \mu_k$ is the projection of the data onto the mean direction
-- $-\frac{1}{2} \mu_k^T \Sigma^{-1} \mu_k$ adjusts for the distribution's spread
-- $\log(\pi_k)$ adjusts for how common the class is (prior probability)
+- $X^T \Sigma^{-1} \mu_k$ measures how well $X$ matches the mean of class $k$, taking the covariance into account
+- $-\frac{1}{2} \mu_k^T \Sigma^{-1} \mu_k$ is a constant for each class, which depends on the class mean
+- $\log(\pi_k)$ favors classes that are more common (prior probability)
 
-Note that $\delta_k(X)$ is linear in $X$ (no squared terms), which is why LDA produces linear decision boundaries.
+$\delta_k(X)$ is linear in $X$ (there are no squared terms), which is why LDA produces linear decision boundaries.
 
 ---
 
@@ -111,15 +107,13 @@ $$
 
 ### Connection to Logistic Regression
 
-Logistic regression directly models  $P(Y∣X)$ (discriminative). LDA instead models $P(X∣Y)$ and $P(Y)$, then uses Bayes’ theorem to obtain $P(Y∣X)$ (generative). In a simple two-class case with some assumptions (e.g. equal covariance, equal priors), LDA and logistic regression can even yield very similar decision boundaries, although they arrive there from different modelling perspectives.
+In the two-class case, LDA and logistic regression lead to the same type of model: the log-odds are a linear function of $X$. The difference is how the coefficients are estimated. Logistic regression estimates them directly and makes no assumption about the distribution of the features. LDA derives them from the class means and the shared covariance matrix. If the features are approximately Gaussian within each class, LDA tends to be more stable and can perform better. If they are not, logistic regression is usually the safer choice.
 
 ---
 
 ## Quadratic Discriminant Analysis (QDA)
 
-QDA is a more flexible version of LDA. It:
-- Also assumes Gaussian distributions for each class.
-- Allows each class to have its own covariance matrix, resulting in quadratic decision boundaries.
+QDA is a more flexible version of LDA. It also assumes a Gaussian distribution of the features within each class, but it allows each class to have its own covariance matrix $\Sigma_k$.
 
 The discriminant function for QDA is:
 
@@ -129,22 +123,24 @@ $$
 
 where:
 - $\Sigma_k$ is the covariance matrix specific to class $k$
-- The determinant term $|\Sigma_k|$ is present because the spread varies between classes 
+- The term $-\frac{1}{2} \log |\Sigma_k|$ is present because the spread of the data differs between the classes
 
-Here, the term $-\frac{1}{2} (X - \mu_k)^T \Sigma_k^{-1} (X - \mu_k)$ remains in quadratic form and depends on $k$, which leads to quadratic decision boundaries.
+Since $\Sigma_k$ now differs between the classes, the quadratic term of $X$ can no longer be removed. This leads to quadratic decision boundaries.
 
 ```{tip} Choosing Between LDA and QDA
 
 **LDA**
-- Is ideal when you assume the classes share a similar spread in the feature space
-- Tends to work better when the sample size is small and the number of features are high
+- Is a good choice when the classes have a similar spread in the feature space
+- Tends to work better when the sample size is small or the number of features is high
 
 **QDA**
-- Is more appropriate when the spread differs significantly across classes and non-linear boundaries are expected
-- Prefers to have a large sample size *per class* to accurately estimate the separate covariance matrices
+- Is more appropriate when the spread differs clearly between the classes
+- Needs a large sample size *per class* to estimate the separate covariance matrices
+
+This is another bias-variance trade-off. A covariance matrix for $p$ features has $p(p+1)/2$ parameters. LDA estimates one such matrix, while QDA estimates one per class, so QDA has less bias but more variance.
 ```
 
-The difference in variance assumptions:
+The following plot shows the difference between the two assumptions. Under the LDA assumption, the two classes have the same shape and orientation. Under the QDA assumption, each class has its own:
 
 ```{code-cell} ipython3
 :tags: [remove-input]
@@ -208,7 +204,7 @@ plt.tight_layout();
 
 ## LDA and QDA in Python
 
-LDA and QDA can be implemented in Python using `sklearn`. In this example, we use artificial data for classification (2 features, 2 classes):
+LDA and QDA can be implemented in Python using `sklearn`. In this example, we use simulated data with 2 features and 2 classes. Note that the two classes clearly have different shapes:
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
@@ -254,7 +250,7 @@ print('QDA Classification Report:')
 print(classification_report(y_test, qda.predict(X_test)))
 ```
 
-To get a better intuitive understanding about the models, we can further plot the decision boundaries by making systematic predictions across a grid in the feature space and coloring it accordingly. It then becomes visible how the decision boundary is linear for LDA and quadratic for QDA:
+QDA performs better on the test set (93% vs. 88% accuracy), which is what we would expect given the different shapes of the classes. To see what the models do, we can plot their decision boundaries by making predictions across a grid in the feature space and coloring it accordingly:
 
 ```{code-cell} ipython3
 import numpy as np
@@ -277,3 +273,23 @@ ax[1].set_title('QDA Decision Boundary')
 plot_decision_boundary(qda, X_train, y_train, ax[1])
 plt.show()
 ```
+
+The decision boundary is linear for LDA and curved for QDA. The curved boundary follows the shapes of the classes more closely, but it also creates regions far away from most of the data, such as the red area in the lower left. There is hardly any data there, so we should not trust the model in these regions.
+
+## Summary
+
+| | Logistic regression | LDA | QDA |
+|---|---|---|---|
+| What it models | $P(Y \mid X)$ directly | $P(X \mid Y)$ and $P(Y)$ | $P(X \mid Y)$ and $P(Y)$ |
+| Assumption about the features | None | Gaussian within each class | Gaussian within each class |
+| Covariance matrices | Not modeled | One shared by all classes | One per class |
+| Decision boundary | Linear | Linear | Quadratic |
+
+```{code-cell} ipython3
+:tags: [remove-input]
+import sys; sys.path.append("..")
+from quizpager import display_quiz_paged
+display_quiz_paged('quiz/LDA_QDA.json')
+```
+
+You will apply LDA and QDA in Exercise 5, together with the Naïve Bayes classifier from the next session.

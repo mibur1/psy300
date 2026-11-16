@@ -1,0 +1,103 @@
+[
+    {
+        "question": "Why is linear regression a poor choice for a binary outcome?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "It can predict values below 0 or above 1, which are impossible as probabilities",
+                "correct": true,
+                "feedback": "Correct! Logistic regression avoids this by modelling the log-odds, which can take any value."
+            },
+            {
+                "answer": "It cannot use more than one predictor",
+                "correct": false,
+                "feedback": "Not quite. Linear regression can use as many predictors as you like."
+            },
+            {
+                "answer": "It always has a lower accuracy than logistic regression",
+                "correct": false,
+                "feedback": "Not quite. The accuracy is not the main problem. The predicted values simply cannot be interpreted as probabilities."
+            }
+        ]
+    },
+    {
+        "question": "A logistic regression predicts a logit of 0 for an observation. What is the predicted probability of class 1?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "value",
+                "value": 0.5,
+                "correct": true,
+                "feedback": "Correct! A logit of 0 means odds of e^0 = 1, so both classes are equally likely."
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. A logit of 0 means that the odds are e^0 = 1. Which probability has odds of 1?"
+            }
+        ]
+    },
+    {
+        "question": "A predictor has a coefficient of 0.69, and e^0.69 ≈ 2. What does this mean?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "With every unit of the predictor, the odds of class 1 double",
+                "correct": true,
+                "feedback": "Correct! The odds ratio e^β tells us by which factor the odds change."
+            },
+            {
+                "answer": "With every unit of the predictor, the probability of class 1 doubles",
+                "correct": false,
+                "feedback": "Not quite. The coefficient acts on the odds, not on the probability. The change in probability depends on where you are on the curve."
+            },
+            {
+                "answer": "With every unit of the predictor, the probability of class 1 increases by 0.69",
+                "correct": false,
+                "feedback": "Not quite. The coefficient describes a change in the log-odds, not in the probability."
+            }
+        ]
+    },
+    {
+        "question": "In a sample, 95% of the people are healthy. A model always predicts 'healthy'. Which statement is true?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Its accuracy is 95%, but its recall for the sick people is 0",
+                "correct": true,
+                "feedback": "Correct! The model never finds a sick person. This is why we should not rely on accuracy alone."
+            },
+            {
+                "answer": "Its accuracy is 95%, so it is a good model",
+                "correct": false,
+                "feedback": "Not quite. It reaches this accuracy without learning anything. Compare it to the majority class!"
+            },
+            {
+                "answer": "Its accuracy is 50%, because there are two classes",
+                "correct": false,
+                "feedback": "Not quite. It is correct for all healthy people, which is 95% of the sample."
+            }
+        ]
+    },
+    {
+        "question": "You build a screening test and want to miss as few patients as possible. Which metric matters most, and how should you change the threshold?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Recall for the patients, with a lower threshold",
+                "correct": true,
+                "feedback": "Correct! A lower threshold classifies more people as patients. You find more of the actual patients, but you also get more false alarms."
+            },
+            {
+                "answer": "Precision for the patients, with a higher threshold",
+                "correct": false,
+                "feedback": "Not quite. This would reduce false alarms, but you would miss more patients."
+            },
+            {
+                "answer": "Accuracy, with the threshold left at 0.5",
+                "correct": false,
+                "feedback": "Not quite. Accuracy treats both types of errors the same, but here missing a patient is the worse one."
+            }
+        ]
+    }
+]

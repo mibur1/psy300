@@ -1,0 +1,104 @@
+[
+    {
+        "question": "Which of these models is generative, i.e. models how the features are distributed within each class?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "LDA",
+                "correct": true,
+                "feedback": "Correct! LDA models P(X | Y) and P(Y), and then uses Bayes' theorem to obtain P(Y | X)."
+            },
+            {
+                "answer": "Logistic regression",
+                "correct": false,
+                "feedback": "Not quite. Logistic regression models P(Y | X) directly, so it is discriminative."
+            },
+            {
+                "answer": "Linear regression",
+                "correct": false,
+                "feedback": "Not quite. Linear regression is not a classification model and does not model the distribution of the predictors."
+            }
+        ]
+    },
+    {
+        "question": "Why does LDA produce a linear decision boundary?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "All classes share one covariance matrix, so the quadratic term is the same for all classes and cancels",
+                "correct": true,
+                "feedback": "Correct! In QDA, every class has its own covariance matrix, so the quadratic term remains."
+            },
+            {
+                "answer": "The features are assumed to be uncorrelated",
+                "correct": false,
+                "feedback": "Not quite. LDA allows correlated features, as long as the correlation is the same in all classes."
+            },
+            {
+                "answer": "The prior probabilities are assumed to be equal",
+                "correct": false,
+                "feedback": "Not quite. The priors shift the boundary, but they have no influence on its shape."
+            }
+        ]
+    },
+    {
+        "question": "You have 10 features and 3 classes. How many covariance parameters does QDA have to estimate?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "value",
+                "value": 165,
+                "correct": true,
+                "feedback": "Correct! Each class has its own covariance matrix with 10 × 11 / 2 = 55 parameters, so 3 × 55 = 165. LDA only needs 55."
+            },
+            {
+                "type": "value",
+                "value": 55,
+                "correct": false,
+                "feedback": "Not quite. This is the number for one covariance matrix, which is all LDA needs. How many matrices does QDA need?"
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. A covariance matrix for p features has p(p+1)/2 parameters, and QDA estimates one matrix per class."
+            }
+        ]
+    },
+    {
+        "question": "You have only 40 observations, 15 features, and no reason to expect different covariances between the classes. Which model would you try first?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "LDA",
+                "correct": true,
+                "feedback": "Correct! With few observations, QDA has too many parameters to estimate. LDA has more bias, but much less variance."
+            },
+            {
+                "answer": "QDA",
+                "correct": false,
+                "feedback": "Not quite. QDA needs a separate covariance matrix per class, which is hard to estimate from so few observations."
+            }
+        ]
+    },
+    {
+        "question": "What is the effect of the term log(π_k) in the discriminant function?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "It favors classes that are more common in the training data",
+                "correct": true,
+                "feedback": "Correct! π_k is the prior probability of class k. If a class is common, an observation needs less evidence to be assigned to it."
+            },
+            {
+                "answer": "It accounts for the correlation between the features",
+                "correct": false,
+                "feedback": "Not quite. This is the role of the covariance matrix."
+            },
+            {
+                "answer": "It makes the decision boundary quadratic",
+                "correct": false,
+                "feedback": "Not quite. The term does not depend on X, so it only shifts the boundary."
+            }
+        ]
+    }
+]
