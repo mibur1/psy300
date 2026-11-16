@@ -6,9 +6,9 @@ kernelspec:
 ---
 # ➗ LDA & QDA
 
-Logistic regression directly models the probability of a class given the features, $P(Y \mid X)$. It is a **discriminative model**: it only cares about the decision boundary that separates the classes.
+Logistic regression directly models how the probability of a class changes with the features, $P(Y \mid X)$. It is a **discriminative model**. The decision boundary (for example where both classes are equally likely) follows directly from these probabilities.
 
-**Generative models** such as Linear Discriminant Analysis (LDA), Quadratic Discriminant Analysis (QDA), and Naïve Bayes (which will be introduced in the next session) go the other way round. They model how the features are distributed within each class, and then use Bayes' theorem to get the probability of each class.
+**Generative models** such as Linear Discriminant Analysis (LDA), Quadratic Discriminant Analysis (QDA), and Naïve Bayes (which will be introduced in the next session) take a different approach. They first model how the features are *distributed* within each class. To classify a new observation, they then use Bayes' theorem to check which class makes it most likely.
 
 ```{tip} Generative models
 
@@ -26,7 +26,7 @@ LDA assumes that:
 
 As a visual intuition in a 2D case (2 predictors), this means the class distributions look like ellipses with the same shape and orientation (but centered at different locations if the classes differ). In detail, LDA requires 4 steps to make a decision:
 
-- **Step 1**: Model the distribution of the predictors $X$ separately for each response class $Y$
+- **Step 1**: Model the distribution of the predictors $X$ separately for each class in $Y$
 - **Step 2**: Use Bayes' theorem to calculate estimates for the posterior probability
 - **Step 3**: Derive the discriminant function for each class
 - **Step 4**: Apply a decision rule to classify the observation
@@ -107,7 +107,7 @@ $$
 
 ### Connection to Logistic Regression
 
-In the two-class case, LDA and logistic regression lead to the same type of model: the log-odds are a linear function of $X$. The difference is how the coefficients are estimated. Logistic regression estimates them directly and makes no assumption about the distribution of the features. LDA derives them from the class means and the shared covariance matrix. If the features are approximately Gaussian within each class, LDA tends to be more stable and can perform better. If they are not, logistic regression is usually the safer choice.
+In the two-class case, LDA and logistic regression lead to the same type of model: the log-odds are a linear function of $X$. The difference is how the coefficients are estimated. Logistic regression estimates them directly and makes no assumption about the distribution of the features. This requires an iterative optimization, which is why you sometimes see convergence warnings. LDA derives them from the class proportions, the class means, and the shared covariance matrix. These are simple summary statistics of the training data, so fitting LDA requires no iterative optimization at all. If the features are approximately Gaussian within each class, LDA tends to be more stable and can perform better. If they are not, logistic regression is usually the safer choice.
 
 ---
 
@@ -204,7 +204,7 @@ plt.tight_layout();
 
 ## LDA and QDA in Python
 
-LDA and QDA can be implemented in Python using `sklearn`. In this example, we use simulated data with 2 features and 2 classes. Note that the two classes clearly have different shapes:
+In this example, we use simulated data with 2 features and 2 classes. Note that the two classes clearly have different shapes:
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
@@ -220,7 +220,7 @@ ax.scatter(X[:, 0], X[:, 1], c=y, cmap='bwr', alpha=0.5)
 ax.set(title="Simulated Data", xlabel="x1", ylabel="x2");
 ```
 
-Fitting the model is straightforward. However, please have a look at the [documentation](https://scikit-learn.org/stable/api/sklearn.discriminant_analysis.html) for additional options such as the specific solver.
+Fitting the model is straightforward. However, please have a look at the [documentation](https://scikit-learn.org/stable/api/sklearn.discriminant_analysis.html) for additional options.
 
 ```{code-cell} ipython3
 from sklearn.model_selection import train_test_split
@@ -230,10 +230,10 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA, \
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-lda = LDA()
+lda = LDA(store_covariance=True) # store the covariance matrix, so that we can plot it later
 lda.fit(X_train, y_train)
 
-qda = QDA()
+qda = QDA(store_covariance=True)
 qda.fit(X_train, y_train);
 ```
 
@@ -250,31 +250,58 @@ print('QDA Classification Report:')
 print(classification_report(y_test, qda.predict(X_test)))
 ```
 
-QDA performs better on the test set (93% vs. 88% accuracy), which is what we would expect given the different shapes of the classes. To see what the models do, we can plot their decision boundaries by making predictions across a grid in the feature space and coloring it accordingly:
+QDA performs better on the test set (93% vs. 88% accuracy), which is what we would expect given the different shapes of the classes. To see what the models do, we can plot the Gaussian distribution that each model learned for each class, together with the resulting decision boundary:
 
 ```{code-cell} ipython3
 import numpy as np
+import seaborn as sns
+from scipy.stats import multivariate_normal
+from matplotlib.lines import Line2D
 
-def plot_decision_boundary(model, X, y, ax):
+sns.set_theme(style="darkgrid")
+
+def plot_distributions(model, X, y, ax, title):
+    # Grid over the feature space
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 500), np.linspace(y_min, y_max, 500))
-    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
-    ax.contourf(xx, yy, Z, alpha=0.3, cmap='bwr')
-    ax.scatter(X[:, 0], X[:, 1], c=y, cmap='bwr', alpha=0.5)
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 300), np.linspace(y_min, y_max, 300))
+    Xgrid = np.c_[xx.ravel(), yy.ravel()]
 
-# Plot decision boundaries
+    # Plot the Gaussian distribution learned for each class
+    for k, color in enumerate(['blue', 'red']):
+        mu = model.means_[k]
+        # LDA shares one covariance matrix, QDA stores one per class
+        cov = model.covariance_[k] if isinstance(model.covariance_, list) else model.covariance_
+        P = multivariate_normal(mean=mu, cov=cov).pdf(Xgrid)
+        P = (P / P.max()).reshape(xx.shape)  # normalise so the peak is 1
+        Pm = np.ma.masked_array(P, P < 0.03)
+        ax.pcolormesh(xx, yy, Pm, shading='auto', alpha=0.4, cmap=color.title() + 's')
+        ax.contour(xx, yy, P, levels=[0.01, 0.1, 0.5, 0.9], colors=color, alpha=0.3)
+
+    # Decision boundary
+    Z = model.predict(Xgrid).reshape(xx.shape)
+    ax.contour(xx, yy, Z, levels=[0.5], linewidths=2, colors='black')
+
+    # Data points
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap='bwr')
+    ax.set(title=title, xlabel="Feature 1", ylabel="Feature 2")
+
 fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-ax[0].set_title('LDA Decision Boundary')
-plot_decision_boundary(lda, X_train, y_train, ax[0])
+plot_distributions(lda, X_train, y_train, ax[0], "LDA Class Distributions")
+plot_distributions(qda, X_train, y_train, ax[1], "QDA Class Distributions")
 
-ax[1].set_title('QDA Decision Boundary')
-plot_decision_boundary(qda, X_train, y_train, ax[1])
+legend_elements = [
+    Line2D([], [], marker='o', linestyle='None', markerfacecolor='blue',
+           markeredgewidth=0, label='Class 0', markersize=8),
+    Line2D([], [], marker='o', linestyle='None', markerfacecolor='red',
+           markeredgewidth=0, label='Class 1', markersize=8),
+    Line2D([], [], color='black', linestyle='-', linewidth=2, label='Decision boundary')
+]
+ax[0].legend(handles=legend_elements, loc="upper left")  # explicit loc: "best" is slow on a dense mesh
 plt.show()
 ```
 
-The decision boundary is linear for LDA and curved for QDA. The curved boundary follows the shapes of the classes more closely, but it also creates regions far away from most of the data, such as the red area in the lower left. There is hardly any data there, so we should not trust the model in these regions.
+LDA gives both classes a distribution with the same shape and orientation, even though the red class is narrower and tilted. As a result, its decision boundary is a straight line. QDA estimates a separate covariance matrix for each class, so its distributions match the shapes of the classes much better, and the boundary is curved. The curved boundary also encloses regions far away from most of the data, such as the area in the lower left that QDA assigns to the red class.
 
 ## Summary
 

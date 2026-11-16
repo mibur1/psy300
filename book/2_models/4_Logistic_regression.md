@@ -20,16 +20,19 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("data.dat", delimiter='\t')
 
 fig, ax = plt.subplots()
-sns.regplot(x="age", y="display", data=df, ax=ax)
+ax.set_xlim(0, 100)
+sns.regplot(x="age", y="display", data=df, ax=ax, truncate=False) # truncate=False extends the line to the x-axis limits
 ax.set(xlabel="Age [month]", ylabel="Understanding display rules")
 
 plt.show()
 ```
 
-We can read the fitted line as a predicted probability, but this breaks down for a binary outcome (0/1):
+We could read the fitted line as a predicted probability. Can you think of problems with this approach for a binary outcome (0/1)?
 
+:::{dropdown} Problems with linear regression for a binary outcome
 - The model can produce predicted values below 0 or above 1, which are impossible probabilities. In our data, the line already predicts 1.02 for the oldest child, and it would fall below 0 for children younger than about 6 months.
-- Linear regression assumes homoscedasticity (constant variance of errors), which binary data violate by construction.
+- The variance of a 0/1 outcome is $p(1-p)$, so it changes whenever the probability $p$ changes with age. This violates the homoscedasticity assuption (constant variance of errors) of linear regression.
+:::
 
 
 ## Logistic Regression with Python
@@ -40,9 +43,10 @@ In this example, we will use the `LogisticRegression()` class from `scikit-learn
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
-# Convert 'age' into a NumPy array and reshape it to a 2D array (required for the model)
+# Convert 'age' into a NumPy array and reshape it to a 2D array (sklearn requirement)
 # .reshape(-1, 1): Creates one column with as many rows as needed (-1 infers the row count)
 X = np.asarray(df['age']).reshape(-1, 1)
+print(X.shape)
 
 # Convert 'display' to a NumPy array for the binary outcome
 y = np.asarray(df['display']) # binary outcome
@@ -55,7 +59,7 @@ print(f"Coefficients: {model.coef_}")
 ```
 
 ```{note}
-`LogisticRegression()` applies a Ridge penalty by default, just like the one you know from the regularization session. Its strength is set by `C`, which works in the opposite direction of λ: smaller values of `C` mean stronger regularization. As before, the penalty depends on the scale of the predictors, so you should standardize them if they have different units. With a single predictor and the default `C=1`, the effect is negligible here.
+`LogisticRegression()` applies a Ridge penalty by default, just like the one you know from the regularization session. As before, the penalty depends on the scale of the predictors, so you should standardize them if they have different units. With a single predictor and the default `C=1`, the effect is negligible here.
 ```
 
 ### Interpreting the Model Outputs: Logits
@@ -67,11 +71,20 @@ The logistic regression still gives us an intercept and a slope, but they operat
 
 **But what even are logits?**
 
-The odds of an event are the ratio of the probability that it occurs ($P$) to the probability that it does not occur $(1-P)$:
+A linear model $\beta_0 + \beta_1X_1 + \dots + \beta_kX_k$ can produce any number, from minus infinity to plus infinity. A probability $P$, however, has to stay between 0 and 1. Logistic regression solves this by transforming the probability in two steps, so that it can take any value as well:
 
-$$\text{Odds} = \frac{P}{1-P}$$
+1. **Odds** $= \frac{P}{1-P}$: how many times more likely the event is to occur than not. A probability of 0.75 gives odds of 3. Odds have no upper limit, but they cannot be negative.
+2. **Logit** $= \ln(\text{odds})$: the logarithm turns odds below 1 into negative numbers, so the logit has no lower limit either.
 
-For example, a probability of 0.75 corresponds to odds of 3 (the event is three times as likely to occur as not). The logit is the natural logarithm of the odds. While probabilities are limited to the range between 0 and 1, logits can take any value. This is why we can model them as a linear combination of the predictors $(X_1, X_2, \dots, X_k)$ and their coefficients $(\beta_1, \beta_2, \dots \beta_k)$:
+:::{div}
+:class: centered-table
+| Probability | $\to 0$ | 0.01 | 0.25 | 0.5 | 0.75 | 0.99 | $\to 1$ |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Odds | $\to 0$ | 0.01 | 0.33 | 1 | 3 | 99 | $\to \infty$ |
+| Logit | $\to -\infty$ | −4.6 | −1.1 | 0 | 1.1 | 4.6 | $\to \infty$ |
+:::
+
+Now the logit and the linear model have the same range, so we can set them equal:
 
 $$\text{Logit}(P) = \ln\left(\frac{P}{1-P}\right) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \dots + \beta_kX_k$$
 
@@ -80,7 +93,7 @@ Unlike in linear regression, the coefficients are not found by least squares. Th
 If we plot the equation, we get a straight line on the logit scale:
 
 ```{code-cell} ipython3
-ages = np.linspace(df['age'].min(), df['age'].max(), 100)
+ages = np.linspace(0, 100, 100)
 logits = model.intercept_[0] + model.coef_[0, 0] * ages
 
 fig, ax = plt.subplots()
@@ -112,13 +125,12 @@ y_prob = y_prob[:,1] # only get the second column
 
 # Plot the results
 fig, ax = plt.subplots()
-ax.scatter(X, y, color='blue', label='data points', alpha=0.5)   # actual data
-ax.plot(x_range, y_prob, color='red', label='model predictions') # regression model
+ax.scatter(X, y, color='blue', label='data points', alpha=0.5)
+ax.plot(x_range, y_prob, color='red', label='model predictions')
 ax.axhline(0.5, color='gray', linestyle='--', label='probability = 0.5')
 ax.set(xlabel='age', ylabel='display', title='Logistic Regression Model')
 
 plt.legend()
-plt.show()
 ```
 
 The predictions now stay between 0 and 1. The effect of age on the probability is not constant: one month makes a larger difference in the middle of the curve than at its ends. The predicted probability is 0.39 at 36 months and 0.76 at 60 months.
@@ -128,7 +140,7 @@ To turn a probability into a class, `model.predict()` uses a threshold of 0.5. A
 
 ## Model Evaluation
 
-To evaluate our model, we can examine how many values of $y$ were predicted correctly:
+To evaluate our model, we can, for example, examine how many values of $y$ were predicted correctly:
 
 ```{code-cell} ipython3
 predictions = model.predict(X)
@@ -141,8 +153,9 @@ print("\nAccuracy:", accuracy)
 The model correctly classifies about 77% of the children (54 of 70). To judge this number, we need a point of comparison: 39 of the 70 children understand display rules, so always predicting this majority class would already reach 56%. For a more detailed look, we can use a confusion matrix:
 
 ```{code-cell} ipython3
-from sklearn.metrics import confusion_matrix, classification_report
-print(f"Confusion matrix:\n {confusion_matrix(y, model.predict(X))}")
+from sklearn.metrics import confusion_matrix
+
+confusion_matrix(y, model.predict(X))
 ```
 
 The output of the confusion matrix provides the following values:
@@ -155,6 +168,8 @@ The output of the confusion matrix provides the following values:
 The model therefore correctly identifies 24 children without and 30 children with an understanding of display rules. It wrongly assigns 7 children to class 1 and 9 children to class 0. For more detail, we can print the classification report:
 
 ```{code-cell} ipython3
+from sklearn.metrics import classification_report
+
 report = classification_report(y, model.predict(X))
 print(report)
 ```

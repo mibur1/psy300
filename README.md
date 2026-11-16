@@ -24,13 +24,3 @@ jupyter book start --execute
 ```
 
 The *.ipynb* notebooks for the exercises are located in the `book/` folder and can either be opened locally or through Google Colab.
-
-## Repository layout
-
-| Path | Purpose |
-|---|---|
-| `myst.yml` | Book configuration and table of contents |
-| `book/` | All chapters, exercises, solutions and figures |
-| `book/*/quiz/` | JSON question banks for `jupyterquiz` / `jupytercards` |
-| `_static/custom.css` | Theme overrides (dark-mode fixes for the quiz widgets) |
-| `.github/workflows/deploy.yml` | Builds and publishes the book on every push to `main` |

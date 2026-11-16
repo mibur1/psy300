@@ -85,3 +85,12 @@ table {
   max-width: 100%;
   overflow-x: auto;
 }
+
+/* --- Centered tables -----------------------------------------------
+   Wrap a table in a {div} with `:class: centered-table` to center it
+   on the page instead of stretching it to the full width.            */
+.centered-table table {
+  width: fit-content; /* the theme displays tables as blocks, so "auto" would fill the full width */
+  margin-left: auto;
+  margin-right: auto;
+}
