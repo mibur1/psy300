@@ -1,0 +1,86 @@
+[
+    {
+        "question": "You remove an observation that lies far away from the decision boundary, on the correct side of the margin. What happens to the SVC?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Nothing, because it is not a support vector",
+                "correct": true,
+                "feedback": "Correct! Only the support vectors determine the decision boundary."
+            },
+            {
+                "answer": "The decision boundary moves towards the removed observation",
+                "correct": false,
+                "feedback": "Not quite. Unlike least squares, the SVC does not use all observations to place the boundary."
+            },
+            {
+                "answer": "The margin becomes wider",
+                "correct": false,
+                "feedback": "Not quite. The margin is defined by the observations closest to the boundary."
+            }
+        ]
+    },
+    {
+        "question": "In scikit-learn, what happens when you increase C?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Margin violations are penalized more, the margin gets narrower, and the model can overfit",
+                "correct": true,
+                "feedback": "Correct! Large C means low bias and high variance. Remember that this is the opposite of C in ISLR and the lecture."
+            },
+            {
+                "answer": "More margin violations are allowed, so the margin gets wider",
+                "correct": false,
+                "feedback": "Not quite. This is what happens with C as a budget in ISLR, but in scikit-learn C is a penalty."
+            },
+            {
+                "answer": "The kernel becomes more flexible",
+                "correct": false,
+                "feedback": "Not quite. The flexibility of the RBF kernel is controlled by gamma."
+            }
+        ]
+    },
+    {
+        "question": "Your RBF SVC reaches 100% training accuracy but only 60% test accuracy, and the boundary forms small islands around individual points. What should you try?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Decrease gamma",
+                "correct": true,
+                "feedback": "Correct! A smaller gamma makes each support vector influence a larger region, which gives a smoother boundary."
+            },
+            {
+                "answer": "Increase gamma",
+                "correct": false,
+                "feedback": "Not quite. This would make the islands even smaller and the overfitting worse."
+            },
+            {
+                "answer": "Increase C",
+                "correct": false,
+                "feedback": "Not quite. A larger C fits the training data even more closely."
+            }
+        ]
+    },
+    {
+        "question": "Why should you standardize the predictors before fitting an SVC?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The margin and the RBF kernel are based on distances, which depend on the units of the predictors",
+                "correct": true,
+                "feedback": "Correct! A predictor with large values would otherwise dominate the distances."
+            },
+            {
+                "answer": "SVCs only work with normally distributed predictors",
+                "correct": false,
+                "feedback": "Not quite. SVCs make no assumption about the distribution of the predictors."
+            },
+            {
+                "answer": "Standardizing turns non-linear problems into linear ones",
+                "correct": false,
+                "feedback": "Not quite. Standardizing only changes the scale. For non-linear problems you need a kernel."
+            }
+        ]
+    }
+]
