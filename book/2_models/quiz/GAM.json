@@ -1,22 +1,70 @@
-[{
-    "question": "Which statements about Generalized Additive Models (GAMs) are correct?",
-    "type": "multiple_choice",
-    "answers": [ 
-        {
-            "answer": "GAMs can outperform linear models in terms of prediction.",
-            "correct": true
-        },
-        {
-            "answer": "Additivity is convenient but it is also one of the main limitations of GAMs",
-            "correct": true
-        },
-        {
-            "answer": "Interpretability is one of the advantages of GAMs due to their additive structure.",
-            "correct": true
-        },
-        {
-            "answer": "GAMs always include all possible interactions between variables automatically.",
-            "correct": false
-        }
-    ]
-}]
+[
+    {
+        "question": "Which statements about Generalized Additive Models (GAMs) are correct? (Select all that apply)",
+        "type": "many_choice",
+        "answers": [
+            {
+                "answer": "GAMs can outperform linear models in terms of prediction",
+                "correct": true,
+                "feedback": "Correct! If the true relationships are non-linear, the additional flexibility can pay off."
+            },
+            {
+                "answer": "Additivity is convenient, but it is also one of the main limitations of GAMs",
+                "correct": true,
+                "feedback": "Correct! Interactions between predictors are not modelled unless we add them explicitly."
+            },
+            {
+                "answer": "Interpretability is one of the advantages of GAMs due to their additive structure",
+                "correct": true,
+                "feedback": "Correct! We can look at the function of each predictor on its own."
+            },
+            {
+                "answer": "GAMs automatically include all possible interactions between variables",
+                "correct": false,
+                "feedback": "Not quite. The effects of the predictors are simply added up, so there are no interactions."
+            }
+        ]
+    },
+    {
+        "question": "In a GAM, the partial effect of age shows an inverted U-shape. What does this mean?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "With the other predictors held constant, the predicted outcome first increases and then decreases with age",
+                "correct": true,
+                "feedback": "Correct! The partial effect shows the contribution of one predictor while the others are held constant."
+            },
+            {
+                "answer": "Age has no effect on the outcome",
+                "correct": false,
+                "feedback": "Not quite. A curved partial effect means that age matters, just not in a linear way."
+            },
+            {
+                "answer": "Age interacts with all other predictors",
+                "correct": false,
+                "feedback": "Not quite. A GAM without interaction terms cannot show interactions."
+            }
+        ]
+    },
+    {
+        "question": "A GAM has a much higher training R² than a linear regression, but a lower test R². What is the most likely explanation?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The GAM is too flexible and overfits the training data",
+                "correct": true,
+                "feedback": "Correct! Fewer basis functions or a smoothing penalty would help, chosen with cross-validation."
+            },
+            {
+                "answer": "The GAM is not flexible enough",
+                "correct": false,
+                "feedback": "Not quite. A model that is not flexible enough would also fit the training data poorly."
+            },
+            {
+                "answer": "The test set is too large",
+                "correct": false,
+                "feedback": "Not quite. The size of the test set does not explain a gap between training and test performance."
+            }
+        ]
+    }
+]

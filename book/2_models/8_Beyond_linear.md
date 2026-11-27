@@ -17,14 +17,14 @@ In many real-world problems, this assumption is too restrictive. The true relati
 In this chapter, we look at four families of methods that allow more flexible regression functions:
 
 - Polynomial regression
-- Stepwise regression
+- Step functions (piecewise constant regression)
 - Spline regression
 - Local regression
 
 Let's start by creating some example data. Imagine we have one predictor $x$ and a response $y$ generated as:
 
 $$
-y = \sin(x) + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0, \sigma^2).
+y = \sin(x) + 0.3x + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0, 0.4^2).
 $$
 
 
@@ -73,7 +73,7 @@ Polynomial regression extends the linear model by including powers of $x$ as add
   $$
 
 ```{note}
-Polynomial regression models are still **linear models in the parameters** $(\beta_0, \dots, \beta_d)$ – we just feed them transformed inputs $(x, x^2, \dots, x^d)$.
+Polynomial regression models are still **linear models in the parameters** $(\beta_0, \dots, \beta_d)$. We only feed them transformed inputs $(x, x^2, \dots, x^d)$, so we can fit them with ordinary least squares.
 ```
 
 Pros:
@@ -124,37 +124,37 @@ plt.legend();
 
 Things to observe:
 
-* Degree 1 (straight line) cannot follow the curvature.
-* Degree 2 or 3 often works well for gently curved relationships.
-* Higher degree models can start to wiggle and overfit the noise.
+* Degree 1 (a straight line) and degree 2 cannot follow the wave in the data.
+* Degree 4 captures the overall pattern, but bends away sharply at both ends of the $x$-range. This is typical for polynomials, which behave worst at the boundaries.
+* Degree 16 follows the data more closely. Such high degrees easily start to fit the noise: in the interactive plot at the end of this chapter, the test error does not improve beyond degree 5.
 
 ---
 
-## Piecewise Constant Regression
+## Step Functions (Piecewise Constant Regression)
 
 The simple idea:
 
 > Divide the range of $x$ into intervals using **cut points** (knots) and fit a **constant mean** within each interval.
 
-Concretely, choose cut points $c_1 < c_2 < \dots < c_K$ and define indicator variables
+Concretely, choose cut points $c_1 < c_2 < \dots < c_K$ and define an indicator variable for each interval above the first cut point:
 
 $$
-I_1(x) = \mathbf{1}(x \le c_1), \quad
-I_2(x) = \mathbf{1}(c_1 < x \le c_2), \dots,
-I_{K+1}(x) = \mathbf{1}(x > c_K).
+C_1(x) = \mathbf{1}(c_1 < x \le c_2), \quad
+C_2(x) = \mathbf{1}(c_2 < x \le c_3), \dots,
+C_K(x) = \mathbf{1}(x > c_K).
 $$
 
-Then the model is
+Each indicator is 1 if $x$ falls into its interval and 0 otherwise. Then the model is
 
 $$
-y \approx \beta_0 + \beta_1 I_1(x) + \dots + \beta_{K+1} I_{K+1}(x),
+y \approx \beta_0 + \beta_1 C_1(x) + \dots + \beta_K C_K(x).
 $$
 
-which produces a **piecewise constant** (stepwise) regression function. This is equivalent to a **B-spline of degree 0** (a “zero-order spline”).
+For $x \le c_1$, all indicators are 0, so $\beta_0$ is the mean of $y$ in the first interval. Each $\beta_j$ is the difference between the mean in interval $j$ and the first interval. We do not need an indicator for the first interval, as it would be perfectly collinear with the intercept (just like with dummy variables). This produces a **piecewise constant** regression function. This is equivalent to a **B-spline of degree 0** (a “zero-order spline”).
 
 Pros:
 
-* Very simple and interpretable: one mean per age/`x`-interval
+* Very simple and interpretable: one mean per interval
 * Useful as a starting point to understand more flexible splines
 
 Cons:
@@ -203,13 +203,13 @@ pred_step = step_fit.predict(xp_trans)
 
 plt.figure(figsize=(10, 6))
 plt.scatter(data["x"], data["y"], alpha=0.4, label="Data")
-plt.plot(xp, pred_step, color="red", label="Stepwise fit (degree 0)")
+plt.plot(xp, pred_step, color="red", label="Step function (degree 0)")
 for c in cut_points:
     plt.axvline(c, color="black", linestyle="--", alpha=0.6)
 
 plt.xlabel("x")
 plt.ylabel("y")
-plt.title("Stepwise regression (zero-order spline)")
+plt.title("Step function (zero-order spline)")
 plt.legend();
 ```
 
@@ -217,14 +217,14 @@ plt.legend();
 
 ## Spline Regression
 
-The previous section introduced "stepwise regression" as 0th-order splines. However, when we talk about spline regression, we usually mean higher-order splines, which will smooth these steps into continuous and differentiable curves. Again, the key idea is the similar:
+The previous section introduced step functions as 0th-order splines. However, when we talk about spline regression, we usually mean higher-order splines, which smooth these steps into continuous curves. The key idea is similar:
 
 > Approximate the regression function by **piecewise polynomials** that are smoothly joined at pre-defined points called **knots**.
 
 For example, a cubic spline with knots at $t_1, \dots, t_K$ is a function that is:
 
 * A cubic polynomial on each interval $(-\infty, t_1)$, $(t_1, t_2)$, …, $(t_K, \infty)$
-* Continuously differentiable up to a certain order at the knots
+* Smooth at the knots: the function and its first and second derivatives are continuous, so there are no jumps or visible kinks
 
 We usually do not work with the piecewise form directly. Instead, we represent splines as a linear combination of **basis functions**:
 
@@ -237,9 +237,9 @@ where $B_j(x)$ are spline basis functions (B-splines). This again gives a linear
 Two common options:
 
 * **B-splines** (flexible general basis)
-* **Natural splines** (add boundary constraints to avoid wild extrapolation)
+* **Natural splines** (additionally linear beyond the outermost knots, which avoids wild behaviour at the boundaries)
 
-Again, we use the convenient `bs()` function from `patsy` to create B-spline bases. We can then plug these into `statsmodels` for ordinary least squares:
+Again, we use the convenient `bs()` function from `patsy` to create B-spline bases. With `df=6` and `degree=3`, the basis consists of 6 functions, which corresponds to 3 knots placed at the quantiles of $x$. We can then plug these into `statsmodels` for ordinary least squares:
 
 ```{code-cell} ipython3
 from patsy import dmatrix
@@ -283,7 +283,7 @@ ax.legend();
 
 ## Local Regression (LOWESS)
 
-Polynomial and spline regression still use a **global basis**: one set of parameters applies to the whole range of $x$. Local regression takes a different view:
+Polynomial and spline regression describe the whole range of $x$ with one fixed set of basis functions and coefficients. Local regression takes a different view:
 
 > Fit a **separate regression** in a neighbourhood around each target point, using only nearby observations (with weights).
 
@@ -302,7 +302,7 @@ Key parameters:
 
   * Small `frac` → very flexible, risk of overfitting
   * Large `frac` → smoother, less flexible
-* **Degree** of local polynomial (often 1 or 2)
+* **Degree** of the local polynomial (often 1 or 2; the `lowess` function in `statsmodels` always fits local lines)
 
 
 `statsmodels` provides a convenient implementation of LOWESS (locally weighted scatterplot smoothing).
@@ -320,8 +320,8 @@ fig, ax = plt.subplots()
 ax.scatter(x, y, alpha=0.3, label="Data")
 
 for frac in frac_list:
-  result = lowess(y, x, frac=frac, return_sorted=True)
-  ax.plot(result[:, 0], result[:, 1], label=f"LOWESS, frac = {frac}", linewidth=2)
+    result = lowess(y, x, frac=frac, return_sorted=True)
+    ax.plot(result[:, 0], result[:, 1], label=f"LOWESS, frac = {frac}", linewidth=2)
 
 ax.set(xlabel="x", ylabel="y", title="Local regression (LOWESS) with different spans")
 ax.legend();
@@ -329,8 +329,8 @@ ax.legend();
 
 Observe:
 
-* `frac = 0.2` follows the data more closely (more wiggles).
-* `frac > 0.5` gives a more general trend.
+* `frac = 0.2` follows the wave in the data closely.
+* `frac = 0.5` and `frac = 0.7` give a smoother trend, but they flatten the dip around $x = 4$ to $5$.
 
 Local regression methods are very useful for **exploratory analysis**: they give a flexible, data-driven summary of the trend without a strong global parametric assumption.
 
@@ -338,7 +338,7 @@ Local regression methods are very useful for **exploratory analysis**: they give
 
 ## Interactive: how much flexibility is too much?
 
-All four methods have exactly one knob that controls flexibility — the polynomial degree, the number of cut points, the spline degrees of freedom, and the LOWESS span. Below you can turn that knob for each method and watch the fit respond. The reported errors come from a 70/30 train/test split, so you can also see *where* the extra flexibility stops paying off.
+Each of the four methods has one setting that controls its flexibility: the polynomial degree, the number of steps, the spline degrees of freedom, and the LOWESS span. Below you can change this setting for each method and watch the fit respond. The reported errors come from a 70/30 train/test split, so you can also see *where* the extra flexibility stops paying off.
 
 ```{code-cell} ipython3
 :tags: [hide-input]
@@ -390,9 +390,10 @@ configs = [
     ("poly",   "Polynomial degree",  "poly", [1, 2, 3, 5, 8, 12, 18]),
     ("step",   "Step function (df)", "step", [2, 3, 4, 6, 8, 12, 20]),
     ("spline", "Cubic spline (df)",  "spl",  [4, 5, 6, 8, 10, 15, 25]),
-    ("lowess", "LOWESS span (frac)", "low",  [0.1, 0.2, 0.3, 0.5, 0.7, 0.9]),
+    ("lowess", "LOWESS span (frac)", "low",  [0.9, 0.7, 0.5, 0.3, 0.2, 0.1]),  # from smooth to flexible, like the others
 ]
 
+# One trace (fitted curve) per method and setting
 traces, steps = [], []
 for method, label, tag, settings in configs:
     for s in settings:
@@ -400,7 +401,7 @@ for method, label, tag, settings in configs:
         traces.append(go.Scatter(x=grid, y=y_grid, mode="lines", visible=False,
                                  line=dict(width=3, color="#c44e52"),
                                  name=f"{label} = {s}"))
-        steps.append((label, s, f"{tag} {s:g}",
+        steps.append((label, s,
                       mean_squared_error(y_tr, y_hat_tr),
                       mean_squared_error(y_te, y_hat_te)))
 
@@ -411,48 +412,58 @@ traces[0].visible = True
 
 
 def caption(i):
-    label, s, _, mtr, mte = steps[i]
+    label, s, mtr, mte = steps[i]
     return f"{label} = {s:g}   |   train MSE = {mtr:.3f}   |   test MSE = {mte:.3f}"
 
 
-slider_steps = []
-for i in range(len(traces)):
-    vis = [True] + [False] * len(traces)
-    vis[i + 1] = True
-    slider_steps.append(dict(
-        method="update", label=steps[i][2],
-        args=[{"visible": vis},
-              {"annotations": [dict(x=0.5, y=1.12, xref="paper", yref="paper",
-                                    text=caption(i), showarrow=False,
-                                    font=dict(size=13), xanchor="center")]}]))
+def annotation(i):
+    return [dict(x=0.5, y=1.04, xref="paper", yref="paper", text=caption(i),
+                 showarrow=False, font=dict(size=13), xanchor="center")]
+
+
+# One slider per method. Moving a slider shows the selected curve of that method
+# and resets all other sliders to their first position.
+sliders, first = [], 0
+for k, (method, label, tag, settings) in enumerate(configs):
+    slider_steps = []
+    for j, s in enumerate(settings):
+        i = first + j
+        vis = [True] + [False] * len(traces)
+        vis[i + 1] = True
+        reset = {f"sliders[{m}].active": 0 for m in range(len(configs)) if m != k}
+        slider_steps.append(dict(method="update", label=f"{s:g}",
+                                 args=[{"visible": vis}, {"annotations": annotation(i), **reset}]))
+    sliders.append(dict(active=0, steps=slider_steps, font=dict(size=10),
+                        currentvalue={"prefix": f"{label}: "},
+                        y=0.36 - 0.1 * k, yanchor="top", len=1, pad={"t": 0, "b": 0}))
+    first += len(settings)
 
 fig = go.Figure(data=[scatter] + traces)
 fig.update_layout(
-    sliders=[dict(active=0, currentvalue={"prefix": "Flexibility setting: "},
-                  font=dict(size=10), pad={"t": 40}, steps=slider_steps)],
-    annotations=[dict(x=0.5, y=1.12, xref="paper", yref="paper", text=caption(0),
-                      showarrow=False, font=dict(size=13), xanchor="center")],
+    sliders=sliders,
+    annotations=annotation(0),
     xaxis_title="x", yaxis_title="y", showlegend=False,
-    margin=dict(l=10, r=10, t=80, b=20), height=500,
+    margin=dict(l=10, r=10, t=60, b=20), height=950,
+    yaxis=dict(domain=[0.47, 1]),  # leave room for the four sliders below the plot
 )
 fig
 ```
 
-The slider walks through all four method families in turn (polynomial, then steps, then splines, then LOWESS). Watch the two error numbers as you drag: the train MSE decreases monotonically for every method, while the test MSE bottoms out and then climbs. That gap is the bias-variance tradeoff of [](../1_basics/2_bias_variance.md), now visible for four different notions of "flexibility".
+Each slider belongs to one method and goes from the least to the most flexible setting. Moving a slider shows the corresponding fit and resets the other sliders. Watch the two error numbers as you drag. The train MSE mostly decreases with more flexibility (small exceptions happen because the knots move when the number of basis functions changes). The test MSE first decreases and then increases again. This is the bias-variance trade-off from [](../1_basics/2_bias_variance.md), now visible for four different kinds of flexibility.
 
 ---
 
-## Summary and Quiz
+## Summary
 
 | Method                            | Key Idea                                          | Flexibility                    | Pros                                  | Cons |
 |-----------------------------------|---------------------------------------------------|--------------------------------|---------------------------------------|------------------------------------------------------------------------|
 | **Polynomial Regression**         | Powers of $x$ as predictors: $x, x^2, \dots, x^d$ | Controlled by degree $d$       | Simple to fit with OLS; interpretable | Oscillates at boundaries; global changes affect entire curve           |
-| **Piecewise Constant Regression** | Constant values in intervals defined by knots     | Controlled by knots            | Simple and interpretable              | Discontinuous at knots; sensitive to knot placement                    |
+| **Step Functions**                | Constant values in intervals defined by knots     | Controlled by knots            | Simple and interpretable              | Discontinuous at knots; sensitive to knot placement                    |
 | **Spline Regression**             | Piecewise polynomials smoothly joined at knots    | Controlled by knots and degree | Smooth and flexible; mostly local     | Requires choosing knots; can overfit with many knots                   |
 | **Local Regression (LOWESS)**     | Weighted regression in neighborhood of each point | Controlled by span/fraction    | Data-driven; no global assumptions    | Computationally intensive; requires choosing span; harder to interpret |
 
 
-In the lecture, all methods except simple polynomial regression are considered local models. In piecewise constant regression, only the information within each bin contributes to the fitted value in that region. Spline regression is also largely local, but neighbouring intervals are coupled through smoothness constraints at the knots, which introduces a limited amount of global structure.
+In the lecture, all methods except polynomial regression are considered local models. With step functions, only the information within each bin contributes to the fitted value in that region. Spline regression is also largely local, but neighbouring intervals are coupled through smoothness constraints at the knots, which introduces a limited amount of global structure.
 
 In practice, these methods are often combined with regularisation and cross-validation to control overfitting and to select tuning parameters such as the degree, number and location of knots, or the span.
 
@@ -460,7 +471,9 @@ In practice, these methods are often combined with regularisation and cross-vali
 
 ```{code-cell} ipython3
 :tags: [remove-input]
-from jupyterquiz import display_quiz
-display_quiz("quiz/BeyondLinear.json", shuffle_answers=True)
-display_quiz("quiz/BeyondLinear2.json", shuffle_answers=True)
+import sys; sys.path.append("..")
+from quizpager import display_quiz_paged
+display_quiz_paged('quiz/BeyondLinear.json')
 ```
+
+**Now it's your turn:** head to the [exercise section](Exercises.ipynb) for Exercise 7, in which you will model wages as a function of age.

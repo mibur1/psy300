@@ -476,7 +476,7 @@ from quizpager import display_quiz_paged
 display_quiz_paged('quiz/SVM.json')
 ```
 
-**Now it's your turn:** head to the [exercise section](Exercises.ipynb) for Exercise 6, in which you will classify fMRI signals with SVCs.
+**Now it's your turn:** head to the [exercise section](Exercises.ipynb) for Exercise 9, in which you will classify fMRI signals with SVCs.
 
 ## References
 

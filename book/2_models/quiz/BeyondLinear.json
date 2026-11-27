@@ -1,22 +1,98 @@
-[{
-    "question": "In polynomial regression of degree 3, which of the following is true?",
-    "type": "multiple_choice",
-    "answers": [ 
-        {
-            "answer": "The model is non-linear in the parameters",
-            "correct": false
-        },
-        {
-            "answer": "The model cannot be fit with ordinary least squares",
-            "correct": false
-        },
-        {
-            "answer": "The model includes $x$, $x^2$, and $x^3$ as predictors",
-            "correct": true
-        },
-        {
-            "answer": "The model always overfits the data",
-            "correct": false
-        }
-    ]
-}]
+[
+    {
+        "question": "In polynomial regression of degree 3, which of the following is true?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The model includes x, x² and x³ as predictors",
+                "correct": true,
+                "feedback": "Correct! The model is still linear in its parameters, so it can be fitted with ordinary least squares."
+            },
+            {
+                "answer": "The model is non-linear in the parameters",
+                "correct": false,
+                "feedback": "Not quite. The relationship between x and y is non-linear, but each coefficient still enters the model linearly."
+            },
+            {
+                "answer": "The model cannot be fit with ordinary least squares",
+                "correct": false,
+                "feedback": "Not quite. We simply add x² and x³ as new predictors and fit a normal linear regression."
+            },
+            {
+                "answer": "The model always overfits the data",
+                "correct": false,
+                "feedback": "Not quite. Whether a model overfits depends on the data. A cubic polynomial is often a reasonable choice."
+            }
+        ]
+    },
+    {
+        "question": "A step function has cut points at 30, 50, and 65 years. How many coefficients does the model have, including the intercept?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "value",
+                "value": 4,
+                "correct": true,
+                "feedback": "Correct! Three cut points create four intervals: one intercept for the first interval and one coefficient for each of the other three."
+            },
+            {
+                "type": "value",
+                "value": 3,
+                "correct": false,
+                "feedback": "Not quite. How many intervals do three cut points create?"
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. Count the intervals that the cut points create. Each interval gets its own mean."
+            }
+        ]
+    },
+    {
+        "question": "What is the main advantage of cubic splines over step functions?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "The fitted curve is smooth at the knots instead of jumping",
+                "correct": true,
+                "feedback": "Correct! The pieces are joined so that the function and its first two derivatives are continuous."
+            },
+            {
+                "answer": "Cubic splines do not need any knots",
+                "correct": false,
+                "feedback": "Not quite. Splines are also defined by knots, but they join the pieces smoothly."
+            },
+            {
+                "answer": "Cubic splines cannot overfit",
+                "correct": false,
+                "feedback": "Not quite. With many knots (a large df), splines can overfit as well."
+            }
+        ]
+    },
+    {
+        "question": "In local regression (LOWESS), what does a higher fraction (frac) lead to? (Select all that apply)",
+        "type": "many_choice",
+        "answers": [
+            {
+                "answer": "A smoother fit",
+                "correct": true,
+                "feedback": "Correct! Each local fit uses more observations, so the curve changes more slowly."
+            },
+            {
+                "answer": "A higher risk of underfitting",
+                "correct": true,
+                "feedback": "Correct! If the neighbourhood is too large, the fit can miss real structure in the data."
+            },
+            {
+                "answer": "A more wiggly fit",
+                "correct": false,
+                "feedback": "Not quite. This happens with a small fraction."
+            },
+            {
+                "answer": "A higher risk of overfitting",
+                "correct": false,
+                "feedback": "Not quite. Overfitting is a risk with small fractions, where each local fit only uses a few points."
+            }
+        ]
+    }
+]

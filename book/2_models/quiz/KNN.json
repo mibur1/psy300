@@ -1,22 +1,87 @@
-[{
-    "question": "Which of the following statements are true for the kNN algorithm? (Multiple answers may be correct)",
-    "type": "multiple_choice",
-    "answers": [
-        {
-            "answer": "Increasing the value of $k$ generally makes the model more flexible.",
-            "correct": false
-          },
-          {
-            "answer": "Decreasing the value of $k$ increases the model's sensitivity to noise.",
-            "correct": true
-          },
-          {
-            "answer": "A higher $k$ value results in smoother decision boundaries.",
-            "correct": true
-          },
-          {
-            "answer": "A lower $k$ value allows the model to capture more specific details of the data.",
-            "correct": true
-          }
+[
+    {
+        "question": "Which of the following statements are true for the kNN algorithm? (Select all that apply)",
+        "type": "many_choice",
+        "answers": [
+            {
+                "answer": "Increasing the value of k generally makes the model more flexible.",
+                "correct": false,
+                "feedback": "Not quite. A larger k averages over more neighbors, which makes the model smoother and less flexible."
+            },
+            {
+                "answer": "Decreasing the value of k increases the model's sensitivity to noise.",
+                "correct": true,
+                "feedback": "Correct! With a small k, a single noisy neighbor can decide the class."
+            },
+            {
+                "answer": "A higher k value results in smoother decision boundaries.",
+                "correct": true,
+                "feedback": "Correct! The prediction is based on more neighbors, so it changes more slowly across the feature space."
+            },
+            {
+                "answer": "A lower k value allows the model to capture more specific details of the data.",
+                "correct": true,
+                "feedback": "Correct! A small k follows the local structure closely, but also the noise."
+            }
         ]
-      }]
+    },
+    {
+        "question": "In a two-class problem, 4 of the 7 nearest neighbors of a new observation belong to class A. What is the estimated probability of class A?",
+        "type": "numeric",
+        "answers": [
+            {
+                "type": "range",
+                "range": [0.57, 0.58],
+                "correct": true,
+                "feedback": "Correct! 4/7 ≈ 0.57, so the observation is classified as class A."
+            },
+            {
+                "type": "default",
+                "correct": false,
+                "feedback": "Not quite. The estimated probability is the fraction of the k neighbors that belong to the class."
+            }
+        ]
+    },
+    {
+        "question": "Your data contain the age of a participant in years and their income in euros. Why should you scale these features before fitting kNN?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Otherwise income dominates the distances, and age is practically ignored",
+                "correct": true,
+                "feedback": "Correct! Differences in income are thousands of times larger than differences in age."
+            },
+            {
+                "answer": "kNN only works with normally distributed features",
+                "correct": false,
+                "feedback": "Not quite. kNN makes no assumption about the distribution of the features."
+            },
+            {
+                "answer": "Scaling reduces the number of neighbors that are needed",
+                "correct": false,
+                "feedback": "Not quite. Scaling changes the distances, not the number of neighbors."
+            }
+        ]
+    },
+    {
+        "question": "You set k equal to the number of training observations. What does the model predict?",
+        "type": "multiple_choice",
+        "answers": [
+            {
+                "answer": "Always the most common class in the training data",
+                "correct": true,
+                "feedback": "Correct! All training points are neighbors of every new observation, so the prediction is always the same."
+            },
+            {
+                "answer": "The class of the closest training point",
+                "correct": false,
+                "feedback": "Not quite. This is what happens with k = 1."
+            },
+            {
+                "answer": "A perfect classification",
+                "correct": false,
+                "feedback": "Not quite. This is the most extreme case of a too simple model."
+            }
+        ]
+    }
+]
